@@ -1,0 +1,17 @@
+{
+  "contract_type": "service",
+  "note": "背靠背付款条款（以业主支付为前提）命中；其余规则保持干净",
+  "expect_violations": ["back_to_back_payment"],
+  "expect_absent": [
+    "performance_deposit_over_10pct",
+    "deposit_refund_missing",
+    "penalty_cap_missing",
+    "payment_terms_missing",
+    "acceptance_vague",
+    "ip_missing",
+    "confidentiality_missing",
+    "dispute_missing",
+    "warranty_missing",
+    "placeholder_blank_fields"
+  ]
+}

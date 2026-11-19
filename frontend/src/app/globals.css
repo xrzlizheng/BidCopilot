@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #070b16;
+  --ink-soft: #0b1020;
+  --surface: #f6f7fb;
+  --line: rgba(148, 163, 184, 0.22);
+  --aurora: #d4af37;
+  --electric: #6366f1;
+}
+
+html {
+  background: var(--surface);
+}
+
+body {
+  @apply bg-surface text-slate-900 antialiased;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  background-image:
+    radial-gradient(circle at 12% -10%, rgba(99, 102, 241, 0.1), transparent 28%),
+    radial-gradient(circle at 92% 0%, rgba(212, 175, 55, 0.08), transparent 26%);
+  background-attachment: fixed;
+}
+
+a {
+  @apply text-inherit no-underline;
+}
+
+::selection {
+  background: rgba(99, 102, 241, 0.25);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.45) transparent;
+}
+
+.aurora-panel {
+  background-image:
+    radial-gradient(circle at 12% 0%, rgba(99, 102, 241, 0.22), transparent 34%),
+    radial-gradient(circle at 100% 10%, rgba(212, 175, 55, 0.14), transparent 32%),
+    linear-gradient(160deg, #080d1a 0%, #0b1020 55%, #121a33 100%);
+}
+
+.aurora-grid {
+  @apply bg-aurora-grid bg-grid;
+}
+
+.mono-label {
+  @apply font-mono text-[10px] uppercase tracking-[0.22em];
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * 阻断提示跳转后的目标高亮。
+ *
+ * 只用 outline + 颜色动画：不改变布局（不会把卡片挤动）、不与卡片自带的
+ * shadow-card 冲突，动画结束后属性自动回落，无需清理样式。
+ * 脉冲三次后淡出，让用户一眼看到「刚刚跳到了这里」。
+ */
+@keyframes jump-highlight {
+  0%,
+  100% {
+    outline-color: rgba(99, 102, 241, 0);
+  }
+  12%,
+  44% {
+    outline-color: rgba(99, 102, 241, 0.95);
+  }
+  28%,
+  60% {
+    outline-color: rgba(99, 102, 241, 0.3);
+  }
+  78% {
+    outline-color: rgba(99, 102, 241, 0.55);
+  }
+}
+
+.jump-highlight {
+  outline: 3px solid transparent;
+  outline-offset: 4px;
+  border-radius: 1rem;
+  animation: jump-highlight 2.1s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* 降低动态：改成一次性静态描边，不做脉冲。 */
+  .jump-highlight {
+    animation: none;
+    outline-color: rgba(99, 102, 241, 0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

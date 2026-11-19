@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "bidcopilot.fullname" . }}
+  labels:
+    {{- include "bidcopilot.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "bidcopilot.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "bidcopilot.selectorLabels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: bidcopilot
+          image: {{ include "bidcopilot.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.bidcopilot.port }}
+          # 非密配置走 ConfigMap；口令与密钥走 Secret。两者键不重叠。
+          envFrom:
+            - configMapRef:
+                name: {{ include "bidcopilot.fullname" . }}-config
+            - secretRef:
+                name: {{ include "bidcopilot.secretName" . }}
+          env:
+            # 外置数据层（ADR-0001）：不启动镜像内的 PostgreSQL/Redis/MinIO。
+            - name: BIDCOPILOT_EXTERNAL_SERVICES
+              value: "1"
+            # 迁移由 migration Job 统一执行，多副本不得各自 upgrade。
+            - name: BIDCOPILOT_SKIP_MIGRATE
+              value: "1"
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: {{ .Values.bidcopilot.startupProbe.periodSeconds }}
+            failureThreshold: {{ .Values.bidcopilot.startupProbe.failureThreshold }}
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: {{ .Values.bidcopilot.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.bidcopilot.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.bidcopilot.readinessProbe.failureThreshold }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: {{ .Values.bidcopilot.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.bidcopilot.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.bidcopilot.livenessProbe.failureThreshold }}
+          resources:
+            {{- toYaml .Values.bidcopilot.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

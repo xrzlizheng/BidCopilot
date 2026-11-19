@@ -1,0 +1,85 @@
+stages:
+  - lint
+  - test
+  - security
+
+default:
+  interruptible: true
+
+backend-lint:
+  stage: lint
+  image: python:3.12-slim
+  before_script:
+    - pip install --no-cache-dir uv
+  script:
+    - cd backend
+    - uv sync --frozen --all-extras
+    - uv run ruff check .
+    - uv run mypy app
+
+backend-test:
+  stage: test
+  image: python:3.12-slim
+  services:
+    - name: postgres:16-alpine
+      alias: postgres
+    - name: redis:7-alpine
+      alias: redis
+  variables:
+    POSTGRES_DB: bidcopilot_test
+    POSTGRES_USER: bidcopilot
+    POSTGRES_PASSWORD: bidcopilot
+    DATABASE_URL: postgresql+asyncpg://bidcopilot:bidcopilot@postgres:5432/bidcopilot_test
+    REDIS_URL: redis://redis:6379/0
+    JWT_SECRET_KEY: test-secret-key-at-least-32-characters-long
+  before_script:
+    - pip install --no-cache-dir uv
+  script:
+    - cd backend
+    - uv sync --frozen --all-extras
+    - uv run alembic upgrade head
+    - uv run pytest -q
+
+frontend:
+  stage: test
+  image: node:24
+  before_script:
+    - corepack enable
+  script:
+    - cd frontend
+    - pnpm install --frozen-lockfile
+    - pnpm lint
+    - pnpm typecheck
+    - pnpm test
+    - pnpm build
+
+security:
+  stage: security
+  image: python:3.12-slim
+  before_script:
+    - pip install --no-cache-dir uv
+  script:
+    - cd backend
+    - uv sync --frozen --all-extras
+    - uv run --no-sync python ../scripts/check_versions.py
+    - cd ..
+    - python -c "import pathlib,sys; bad=[str(p) for p in pathlib.Path('.').rglob('*.sh') if 'node_modules' not in str(p) and '.venv' not in str(p) and b'\r' in p.read_bytes()]; print('CRLF shell scripts:', bad); sys.exit(1 if bad else 0)"
+    - python scripts/check_architecture.py
+    - python scripts/check_licenses.py --backend-only
+    - python scripts/check_secrets.py
+
+gateway-live:
+  stage: test
+  image: python:3.12-slim
+  when: manual
+  variables:
+    GATEWAY_LIVE: "1"
+    ENABLE_MOCK_MODE: "false"
+    DATABASE_URL: postgresql+asyncpg://bidcopilot:bidcopilot@localhost:5432/bidcopilot_test
+    JWT_SECRET_KEY: test-secret-key-at-least-32-characters-long
+  before_script:
+    - pip install --no-cache-dir uv
+  script:
+    - cd backend
+    - uv sync --frozen --all-extras
+    - uv run pytest -m gateway_live -q

@@ -1,0 +1,32 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "bidcopilot.fullname" . }}
+  labels:
+    {{- include "bidcopilot.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.ingress.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  {{- with .Values.ingress.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          # 单体器件：单一 Service 单端口，nginx 在容器内分发 /api 与页面。
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "bidcopilot.fullname" . }}
+                port:
+                  number: {{ .Values.bidcopilot.port }}
+{{- end }}

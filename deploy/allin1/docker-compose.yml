@@ -1,0 +1,32 @@
+# 项目名固定，使 Docker Desktop 中的分组与容器名都体现项目与功能。
+name: bidcopilot
+
+# 单容器部署：应用 + PostgreSQL + Redis + MinIO + nginx 全在一个容器内。
+# 容器名与本地测试、生产环境保持一致。
+services:
+  bidcopilot:
+    build:
+      context: ../..
+      dockerfile: deploy/allin1/Dockerfile
+    image: bidcopilot:single
+    container_name: bidcopilot-app
+    env_file:
+      - ../.env
+    environment:
+      # 本地冒烟由 scripts/run_local_site.sh 显式开启；生产默认不灌演示数据。
+      - BIDCOPILOT_SEED_DEMO=${BIDCOPILOT_SEED_DEMO:-0}
+      - BIDCOPILOT_DEMO_PASSWORD=${BIDCOPILOT_DEMO_PASSWORD:-}
+    ports:
+      - "127.0.0.1:18080:80"
+      # 55432/6380 在本交付机不可用：55432 落在 Windows Hyper-V 保留端口段
+      # （55428–55527），6380 被 Docker 端口分配器泄漏占用。宿主侧工具与集成
+      # 测试统一改用 25432（PG）/6390（Redis）。
+      - "127.0.0.1:25432:5432"
+      - "127.0.0.1:6390:6379"
+    volumes:
+      - bidcopilot_data:/data
+    restart: unless-stopped
+
+volumes:
+  bidcopilot_data:
+    name: bidcopilot_data

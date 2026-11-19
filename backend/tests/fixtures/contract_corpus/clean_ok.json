@@ -1,0 +1,18 @@
+{
+  "contract_type": "service",
+  "note": "全项合规的干净合同：规则库零命中",
+  "expect_violations": [],
+  "expect_absent": [
+    "performance_deposit_over_10pct",
+    "deposit_refund_missing",
+    "back_to_back_payment",
+    "penalty_cap_missing",
+    "payment_terms_missing",
+    "acceptance_vague",
+    "ip_missing",
+    "confidentiality_missing",
+    "dispute_missing",
+    "warranty_missing",
+    "placeholder_blank_fields"
+  ]
+}

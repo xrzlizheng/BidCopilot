@@ -1,0 +1,8 @@
+apiVersion: v2
+name: bidcopilot
+description: BidCopilot single-appliance chart for customer Kubernetes platforms
+type: application
+# chart version 与 appVersion 必须等于仓库 VERSION（scripts/check_versions.py 校验）；
+# 发布时随 VERSION 一起提升，不单独 bump。
+version: 0.1.0
+appVersion: "0.1.0"

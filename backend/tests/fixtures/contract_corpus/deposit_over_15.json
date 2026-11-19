@@ -1,0 +1,17 @@
+{
+  "contract_type": "service",
+  "note": "履约保证金 15% 超上限（阈值反转对的正例：15% 命中，9.9% 与恰好 10% 不命中）",
+  "expect_violations": ["performance_deposit_over_10pct"],
+  "expect_absent": [
+    "deposit_refund_missing",
+    "back_to_back_payment",
+    "penalty_cap_missing",
+    "payment_terms_missing",
+    "acceptance_vague",
+    "ip_missing",
+    "confidentiality_missing",
+    "dispute_missing",
+    "warranty_missing",
+    "placeholder_blank_fields"
+  ]
+}

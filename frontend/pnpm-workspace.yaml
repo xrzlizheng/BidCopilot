@@ -1,0 +1,10 @@
+allowBuilds:
+  esbuild: true
+onlyBuiltDependencies:
+  - esbuild
+overrides:
+  # esbuild 0.19.3 has a Windows bug: its Go ReadDir reports "Access is denied"
+  # on this host for directories Node can read fine, and tsConfigForDir then
+  # nil-derefs -> panic, so vitest cannot load vitest.config.ts.
+  # >=0.20 fixes both the directory read and the panic (verified 0.21.5).
+  esbuild: 0.21.5

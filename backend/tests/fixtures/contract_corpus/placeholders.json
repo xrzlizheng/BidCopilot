@@ -1,0 +1,17 @@
+{
+  "contract_type": "service",
+  "note": "占位符未定内容：空白线/待定/未实名主体/引用不存在的附件",
+  "expect_violations": ["placeholder_blank_fields"],
+  "expect_absent": [
+    "performance_deposit_over_10pct",
+    "deposit_refund_missing",
+    "back_to_back_payment",
+    "penalty_cap_missing",
+    "payment_terms_missing",
+    "acceptance_vague",
+    "ip_missing",
+    "confidentiality_missing",
+    "dispute_missing",
+    "warranty_missing"
+  ]
+}

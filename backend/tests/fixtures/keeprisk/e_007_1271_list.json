@@ -1,0 +1,131 @@
+{
+  "code": "100",
+  "orderNo": "<redacted>",
+  "charge": true,
+  "data": {
+    "total": 1152,
+    "pageNo": 1,
+    "pageSize": 3,
+    "list": [
+      {
+        "city": "南充市",
+        "bidEntInfos": "四川德憬交通建设投资有限公司",
+        "winBidAmount": "",
+        "county": "仪陇县",
+        "publishDate": "2026-10-16 00:00:00",
+        "industry": [
+          "弱电安防"
+        ],
+        "agentEntInfos": "景恒(四川)建设项目管理有限公司",
+        "title": "【企业采购】仪陇县2025年城镇老旧小区改造项目（安防）工程采购公告",
+        "content": "",
+        "tenderEntNameInfos": "",
+        "sourceUrl": "https://www.scncggzy.com.cn/yilong//jygk/001005/001005001/20261016/e7bb6acd-1e49-4c2c-ad96-721ed4ae89f9.html?cid=14",
+        "involvingEntName": "",
+        "uid": "526498d2fcc11acb5c80781a3128256a",
+        "tenderEidInfos": [],
+        "infoType": "1",
+        "projectNo": "DX2026000282",
+        "province": "四川",
+        "entRole": null,
+        "maxWinBidAmount": null,
+        "keyword": "",
+        "bidEidInfos": [
+          "0e79e5febbea493203117cd709872e21"
+        ],
+        "tenderingMethod": "公开招标",
+        "agentEidInfos": [
+          "e1abb7212d54412ce4a44bd076541ec0"
+        ],
+        "noticeTypeSub": "招标",
+        "winEidInfos": "",
+        "budgetAmount": "",
+        "maxBudgetAmount": null,
+        "bidEntType": [
+          "0"
+        ],
+        "businessType": "",
+        "projectName": "仪陇县2025年城镇老旧小区改造项目（安防）工程",
+        "winBidEidInfos": []
+      },
+      {
+        "city": "",
+        "bidEntInfos": "中国联通兴安盟分公司",
+        "winBidAmount": "",
+        "county": "",
+        "publishDate": "2026-04-29 00:00:00",
+        "industry": [
+          "服务采购",
+          "科教文卫",
+          "交通工程",
+          "信息通信",
+          "水利水电"
+        ],
+        "agentEntInfos": "",
+        "title": "2026年中国联通兴安盟分公司12345政务服务热线业务外包服务项目（二次）询比采购公告",
+        "content": "",
+        "tenderEntNameInfos": "",
+        "sourceUrl": "https://jszb.chinaccsscm.cn/bggg/454530.jhtml",
+        "involvingEntName": "",
+        "uid": "f86b46d024771638767f5b9f919b09f0",
+        "tenderEidInfos": [],
+        "infoType": "1",
+        "projectNo": "",
+        "province": "",
+        "entRole": null,
+        "maxWinBidAmount": null,
+        "keyword": "",
+        "bidEidInfos": [],
+        "tenderingMethod": "公开招标",
+        "agentEidInfos": [],
+        "noticeTypeSub": "招标",
+        "winEidInfos": "",
+        "budgetAmount": "",
+        "maxBudgetAmount": null,
+        "bidEntType": [],
+        "businessType": "服务",
+        "projectName": "2026年中国联通兴安盟分公司12345政务服务热线业务外包服务项目",
+        "winBidEidInfos": []
+      },
+      {
+        "city": "",
+        "bidEntInfos": "中国银行股份有限公司广东省分行广州珠江支行",
+        "winBidAmount": "",
+        "county": "",
+        "publishDate": "2025-11-21 00:00:00",
+        "industry": [
+          "服务采购"
+        ],
+        "agentEntInfos": "中金国际招标有限公司",
+        "title": "中国银行股份有限公司广东省分行广州珠江支行本部员工工作餐服务项目[ZJZB-2025-20334]-磋商公告",
+        "content": "",
+        "tenderEntNameInfos": "",
+        "sourceUrl": "https://zb.chinaccsscm.cn/zbgg/444921.jhtml",
+        "involvingEntName": "",
+        "uid": "dc61fdb57ec0572b8a4944b9691b847d",
+        "tenderEidInfos": [],
+        "infoType": "1",
+        "projectNo": "",
+        "province": "",
+        "entRole": null,
+        "maxWinBidAmount": null,
+        "keyword": "",
+        "bidEidInfos": [],
+        "tenderingMethod": "公开招标",
+        "agentEidInfos": [],
+        "noticeTypeSub": "招标",
+        "winEidInfos": "",
+        "budgetAmount": "",
+        "maxBudgetAmount": null,
+        "bidEntType": [],
+        "businessType": "",
+        "projectName": "",
+        "winBidEidInfos": []
+      }
+    ]
+  },
+  "pcode": "E_007_1271",
+  "param": null,
+  "time": "1792556964814",
+  "message": "查询成功"
+}

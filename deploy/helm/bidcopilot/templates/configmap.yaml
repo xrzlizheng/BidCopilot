@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "bidcopilot.fullname" . }}-config
+  labels:
+    {{- include "bidcopilot.labels" . | nindent 4 }}
+data:
+  APP_ENV: {{ .Values.bidcopilot.env.APP_ENV | quote }}
+  SNAPSHOT_STORE: {{ .Values.bidcopilot.env.SNAPSHOT_STORE | quote }}
+  MINIO_ENDPOINT: {{ .Values.minio.endpoint | quote }}
+  MINIO_BUCKET: {{ .Values.bidcopilot.env.MINIO_BUCKET | quote }}
+  MINIO_SECURE: {{ .Values.bidcopilot.env.MINIO_SECURE | quote }}
+  REDIS_URL: {{ .Values.redis.url | quote }}
+  SCHEDULER_ENABLED: {{ .Values.bidcopilot.env.SCHEDULER_ENABLED | quote }}
+  KEEPRISK_API_BASE_URL: {{ .Values.bidcopilot.env.KEEPRISK_API_BASE_URL | quote }}
+  KEEPRISK_MCP_ENABLED: {{ .Values.bidcopilot.env.KEEPRISK_MCP_ENABLED | default "false" | quote }}
+  KEEPRISK_MCP_URL: {{ .Values.bidcopilot.env.KEEPRISK_MCP_URL | default "https://mcp.keeprisk.com/mcp" | quote }}
+  KEEPRISK_MCP_TIMEOUT_SECONDS: {{ .Values.bidcopilot.env.KEEPRISK_MCP_TIMEOUT_SECONDS | default "30" | quote }}
+  LLM_BASE_URL: {{ .Values.bidcopilot.env.LLM_BASE_URL | quote }}
+  LLM_MODEL: {{ .Values.bidcopilot.env.LLM_MODEL | quote }}
+  MINIMAX_API_HOST: {{ .Values.bidcopilot.env.MINIMAX_API_HOST | quote }}
+  MINIMAX_OCR_MAX_PAGES: {{ .Values.bidcopilot.env.MINIMAX_OCR_MAX_PAGES | quote }}
+  SMTP_HOST: {{ .Values.bidcopilot.env.SMTP_HOST | default "" | quote }}
+  SMTP_PORT: {{ .Values.bidcopilot.env.SMTP_PORT | default "587" | quote }}
+  SMTP_USERNAME: {{ .Values.bidcopilot.env.SMTP_USERNAME | default "" | quote }}
+  SMTP_FROM: {{ .Values.bidcopilot.env.SMTP_FROM | default "" | quote }}
+  SMTP_USE_TLS: {{ .Values.bidcopilot.env.SMTP_USE_TLS | default "true" | quote }}
+  WEBHOOK_DELIVERY_ENABLED: {{ .Values.bidcopilot.env.WEBHOOK_DELIVERY_ENABLED | default "true" | quote }}
+  WEBHOOK_TIMEOUT_SECONDS: {{ .Values.bidcopilot.env.WEBHOOK_TIMEOUT_SECONDS | default "10" | quote }}
+  WEBHOOK_MAX_ATTEMPTS: {{ .Values.bidcopilot.env.WEBHOOK_MAX_ATTEMPTS | default "3" | quote }}
+  WEBHOOK_RETRY_BACKOFF_SECONDS: {{ .Values.bidcopilot.env.WEBHOOK_RETRY_BACKOFF_SECONDS | default "0.5" | quote }}
+  WEBHOOK_ALLOWED_HOSTS: {{ .Values.bidcopilot.env.WEBHOOK_ALLOWED_HOSTS | default "" | quote }}
+  WEBHOOK_ALLOW_PRIVATE_URL: {{ .Values.bidcopilot.env.WEBHOOK_ALLOW_PRIVATE_URL | default "false" | quote }}

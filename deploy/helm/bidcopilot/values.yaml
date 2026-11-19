@@ -1,0 +1,111 @@
+nameOverride: ""
+fullnameOverride: ""
+imagePullSecrets: []
+
+# 单一构建产物（docs/adr/ADR-0001）：K8s 消费与单容器部署同一镜像。
+# tag 留空时使用 Chart.AppVersion（每个发布版本一个新 tag）；固定 tag +
+# IfNotPresent 会让 helm upgrade 永远复用旧镜像。
+image:
+  repository: bidcopilot
+  tag: ""
+  pullPolicy: Always
+
+replicaCount: 2
+
+bidcopilot:
+  port: 80
+  env:
+    APP_ENV: production
+    SNAPSHOT_STORE: minio
+    MINIO_BUCKET: bidcopilot
+    MINIO_SECURE: "false"
+    # 多副本下每个实例都会跑调度器 tick；互斥由 app/db/locks.py 的
+    # advisory lock 保证（同一时刻只有一个实例真正执行），可安全多副本。
+    SCHEDULER_ENABLED: "true"
+    KEEPRISK_API_BASE_URL: https://api.keeprisk.com:9080/api/data
+    KEEPRISK_MCP_ENABLED: "false"
+    KEEPRISK_MCP_URL: https://mcp.keeprisk.com/mcp
+    KEEPRISK_MCP_TIMEOUT_SECONDS: "30"
+    LLM_BASE_URL: ""
+    LLM_MODEL: ""
+    MINIMAX_API_HOST: ""
+    MINIMAX_OCR_MAX_PAGES: "10"
+    # 通知渠道 SMTP（企业微信 Webhook 由设置页配置，无需服务端密钥）
+    SMTP_HOST: ""
+    SMTP_PORT: "587"
+    SMTP_USERNAME: ""
+    SMTP_FROM: ""
+    SMTP_USE_TLS: "true"
+    # 开放 API Webhook 出站（API 令牌由设置页签发）
+    WEBHOOK_DELIVERY_ENABLED: "true"
+    WEBHOOK_TIMEOUT_SECONDS: "10"
+    WEBHOOK_MAX_ATTEMPTS: "3"
+    WEBHOOK_RETRY_BACKOFF_SECONDS: "0.5"
+    WEBHOOK_ALLOWED_HOSTS: ""
+    WEBHOOK_ALLOW_PRIVATE_URL: "false"
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  # 慢启动预算：首启含数据库迁移与 Next.js 冷启动，startupProbe 给足 5 分钟。
+  startupProbe:
+    periodSeconds: 10
+    failureThreshold: 30
+  readinessProbe:
+    initialDelaySeconds: 20
+    periodSeconds: 10
+    failureThreshold: 3
+  livenessProbe:
+    initialDelaySeconds: 90
+    periodSeconds: 30
+    failureThreshold: 3
+
+# 外置数据层（ADR-0001）：镜像内置的 PostgreSQL/Redis/MinIO 不启动
+# （BIDCOPILOT_EXTERNAL_SERVICES=true），改由集群内或托管实例提供。
+# 口令类连接串走 secrets.databaseUrl，不要写在这里。
+redis:
+  url: redis://redis:6379/0
+minio:
+  endpoint: minio:9000
+
+secrets:
+  create: true
+  name: bidcopilot-secrets
+  existingSecret: ""
+  # 必填：含口令的数据库连接串；32 字符以上的 JWT 签名密钥。
+  databaseUrl: ""
+  jwtSecretKey: ""
+  # 加密主密钥：base64 32 字节；K8s 形态建议由 Secret 管理注入，勿写版本库。
+  # 留空时加密能力（模型 Key / Webhook secret）不可用，接口返回 503。
+  modelSecretMasterKey: ""
+  # 可选：留空则对应能力不启用。
+  minioAccessKey: ""
+  minioSecretKey: ""
+  keepriskAppCode: ""
+  keepriskMcpToken: ""
+  llmApiKey: ""
+  minimaxApiKey: ""
+  # SMTP 发信口令（企业微信 Webhook 无需服务端密钥）
+  smtpPassword: ""
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "25m"
+  host: bidcopilot.local
+  tls: []
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

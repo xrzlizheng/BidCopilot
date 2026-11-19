@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BidCopilot · AI 招投标指挥台（静态演示）</title>
+  <meta name="description" content="BidCopilot 静态演示：AI 招投标指挥台、机会中心、投标项目、模板与技能、合规预检与 AI 评标、数据运营。" />
+  <style>
+    :root{
+      --ink-950:#070b16; --ink-900:#0b1020; --ink-800:#141b34; --ink-700:#1e2745;
+      --gold-300:#f3e3b4; --gold-400:#e8cf8f; --gold-500:#d4af37; --gold-600:#9a7212;
+      --indigo-300:#c7d2fe; --indigo-400:#a5b4fc; --indigo-500:#6366f1; --indigo-600:#4f46e5;
+      --surface:#f6f7fb; --panel:#ffffff; --line:rgba(148,163,184,.24);
+      --text:#0f172a; --muted:#5b6577; --faint:#94a3b8;
+      --green:#047857; --green-bg:#ecfdf5; --amber:#b45309; --amber-bg:#fffbeb;
+      --rose:#be123c; --rose-bg:#fff1f2; --blue:#1d4ed8; --blue-bg:#eff6ff;
+      --radius:16px;
+      --shadow:0 18px 50px -32px rgba(7,11,22,.42);
+      --mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+      --sans:"Inter","Noto Sans SC","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    body{
+      font-family:var(--sans); color:var(--text); background:var(--surface);
+      background-image:radial-gradient(circle at 12% -10%,rgba(99,102,241,.10),transparent 28%),
+                       radial-gradient(circle at 92% 0%,rgba(212,175,55,.08),transparent 26%);
+      background-attachment:fixed; -webkit-font-smoothing:antialiased;
+    }
+    a{color:inherit;text-decoration:none}
+    button{font:inherit;cursor:pointer}
+    .app{display:flex;min-height:100vh}
+    /* sidebar */
+    .sidebar{
+      width:248px;flex:0 0 248px;padding:22px 14px;color:#cbd5e1;display:flex;flex-direction:column;
+      background-image:radial-gradient(circle at 12% 0%,rgba(99,102,241,.22),transparent 34%),
+                       radial-gradient(circle at 100% 10%,rgba(212,175,55,.14),transparent 32%),
+                       linear-gradient(160deg,#080d1a 0%,#0b1020 55%,#121a33 100%);
+      position:sticky;top:0;height:100vh;overflow:auto;
+    }
+    .brand{display:flex;align-items:center;gap:11px;padding:0 8px}
+    .brand-mark{
+      width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+      background:linear-gradient(135deg,var(--gold-400),var(--gold-500));color:var(--ink-950);
+      box-shadow:0 0 0 1px rgba(212,175,55,.35),0 14px 30px -12px rgba(212,175,55,.55);
+    }
+    .brand-title{font-size:15px;font-weight:650;color:#fff;letter-spacing:-.01em}
+    .brand-sub{font-family:var(--mono);font-size:9px;letter-spacing:.22em;color:#64748b;margin-top:2px}
+    .demo-chip{
+      margin:18px 8px 0;display:inline-flex;align-items:center;gap:6px;align-self:flex-start;
+      font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+      color:var(--gold-400);border:1px solid rgba(212,175,55,.35);border-radius:999px;
+      padding:5px 9px;background:rgba(212,175,55,.07);
+    }
+    .demo-chip i{width:5px;height:5px;border-radius:50%;background:var(--gold-400);display:inline-block}
+    .nav{margin-top:22px;display:flex;flex-direction:column;gap:20px}
+    .nav-group-label{font-family:var(--mono);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#526079;padding:0 12px;margin-bottom:8px}
+    .nav-btn{
+      width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:0;border-radius:11px;
+      background:transparent;color:#94a3b8;font-size:13.5px;text-align:left;transition:.18s;position:relative;
+    }
+    .nav-btn svg{width:16px;height:16px;flex:0 0 16px;stroke:currentColor;fill:none;stroke-width:1.7;opacity:.9}
+    .nav-btn:hover{background:rgba(255,255,255,.045);color:#e2e8f0}
+    .nav-btn[aria-selected="true"]{
+      background:rgba(255,255,255,.08);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+    }
+    .nav-btn[aria-selected="true"]::before{
+      content:"";position:absolute;left:0;top:9px;bottom:9px;width:2px;border-radius:2px;background:var(--gold-400);
+    }
+    .nav-btn[aria-selected="true"] svg{color:var(--gold-400)}
+    .side-user{
+      margin-top:auto;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.07);
+      background:rgba(255,255,255,.035);display:flex;align-items:center;gap:9px;
+    }
+    .avatar{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:650;color:#fff;background:linear-gradient(135deg,#334155,#1e293b)}
+    .side-user-name{font-size:12px;color:#e2e8f0;font-weight:600}
+    .side-user-sub{font-size:10.5px;color:#64748b;margin-top:1px}
+    /* main */
+    .main{flex:1;min-width:0}
+    .topbar{
+      position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:12px;
+      height:64px;padding:0 26px;background:rgba(255,255,255,.76);backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(226,232,240,.8);
+    }
+    .crumb{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#334155}
+    .crumb .slash{font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:#94a3b8}
+    .top-actions{display:flex;align-items:center;gap:9px}
+    .pill{
+      display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 10px;
+      font-size:11px;border:1px solid var(--line);background:#fff;color:var(--muted);
+    }
+    .pill.gold{color:var(--gold-600);border-color:rgba(212,175,55,.4);background:rgba(212,175,55,.08)}
+    .pill.indigo{color:var(--indigo-600);border-color:rgba(99,102,241,.3);background:rgba(99,102,241,.07)}
+    .pill i{width:6px;height:6px;border-radius:50%;background:currentColor;display:inline-block}
+    .role-switch{display:inline-flex;align-items:center;background:#eef2f7;border-radius:999px;padding:3px;gap:2px}
+    .role-switch button{border:0;background:transparent;border-radius:999px;padding:5px 10px;font-size:11px;color:var(--muted);white-space:nowrap}
+    .role-switch button[aria-pressed="true"]{background:#fff;color:var(--ink-900);font-weight:600;box-shadow:0 1px 3px rgba(15,23,42,.14)}
+    body[data-role="user"] .admin-only{display:none !important}
+    .content{padding:26px 26px 42px;max-width:1440px;margin:0 auto}
+    .view{display:none;animation:rise .28s ease both}
+    .view.active{display:block}
+    @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    @media (prefers-reduced-motion:reduce){.view{animation:none}}
+    .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold-600);margin:0 0 8px}
+    h1{margin:0;font-size:27px;line-height:1.2;letter-spacing:-.02em}
+    .subtitle{margin:8px 0 0;color:var(--muted);font-size:13.5px;line-height:1.65;max-width:760px}
+    .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+    .btn{
+      display:inline-flex;align-items:center;gap:7px;border:0;border-radius:11px;padding:9px 14px;
+      font-size:13px;font-weight:600;background:linear-gradient(135deg,var(--indigo-500),var(--indigo-600));
+      color:#fff;box-shadow:0 12px 28px -16px rgba(99,102,241,.9);
+    }
+    .btn:hover{filter:brightness(1.06)}
+    .btn.ghost{background:#fff;color:#334155;border:1px solid var(--line);box-shadow:none}
+    .btn.ghost:hover{border-color:rgba(99,102,241,.4);color:var(--indigo-600)}
+    .grid{display:grid;gap:12px}
+    .kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:14px}
+    .card{
+      background:rgba(255,255,255,.86);border:1px solid rgba(226,232,240,.9);border-radius:var(--radius);
+      box-shadow:var(--shadow);padding:16px;
+    }
+    .kpi-label{font-size:12px;color:var(--muted)}
+    .kpi-value{font-size:26px;font-weight:650;letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums}
+    .kpi-hint{font-size:11px;color:var(--faint);margin-top:4px}
+    .kpi{display:flex;justify-content:space-between;gap:10px}
+    .kpi-icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex:0 0 32px}
+    .tone-gold{background:rgba(212,175,55,.14);color:var(--gold-600)}
+    .tone-indigo{background:rgba(99,102,241,.12);color:var(--indigo-600)}
+    .tone-amber{background:var(--amber-bg);color:var(--amber)}
+    .tone-slate{background:#f1f5f9;color:#475569}
+    .two-col{display:grid;grid-template-columns:1.35fr 1fr;gap:12px}
+    .card-title{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:650;margin:0 0 12px}
+    .card-title span.mono{font-family:var(--mono);font-size:9px;letter-spacing:.18em;color:var(--faint);font-weight:500}
+    .stage-list{display:flex;flex-direction:column;gap:9px}
+    .stage{display:flex;align-items:center;gap:11px;padding:10px 11px;border:1px solid #eef2f7;border-radius:12px;background:#fbfcfe}
+    .stage-no{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-family:var(--mono);font-size:11px;color:var(--indigo-600);background:rgba(99,102,241,.09);flex:0 0 26px}
+    .stage-name{font-size:12.5px;font-weight:600}
+    .stage-desc{font-size:11px;color:var(--faint);margin-top:1px}
+    .stage-state{margin-left:auto;font-size:10.5px;white-space:nowrap}
+    .state-ok{color:var(--green)}
+    .state-warn{color:var(--amber)}
+    .kv{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed #eef2f7;font-size:12.5px}
+    .kv:last-child{border-bottom:0}
+    .kv span:first-child{color:var(--muted)}
+    .kv b{font-weight:600}
+    .mono{font-family:var(--mono)}
+    .badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 8px;font-size:10.5px;font-weight:600;border:1px solid transparent;white-space:nowrap}
+    .b-green{background:var(--green-bg);color:var(--green);border-color:#a7f3d0}
+    .b-amber{background:var(--amber-bg);color:var(--amber);border-color:#fde68a}
+    .b-rose{background:var(--rose-bg);color:var(--rose);border-color:#fecdd3}
+    .b-blue{background:var(--blue-bg);color:var(--blue);border-color:#bfdbfe}
+    .b-slate{background:#f1f5f9;color:#475569;border-color:#e2e8f0}
+    .b-gold{background:rgba(212,175,55,.1);color:var(--gold-600);border-color:rgba(212,175,55,.35)}
+    .b-indigo{background:rgba(99,102,241,.09);color:var(--indigo-600);border-color:rgba(99,102,241,.25)}
+    /* opportunities */
+    .filters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+    .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 11px;font-size:11.5px;color:var(--muted)}
+    .chip.active{background:var(--ink-900);color:#fff;border-color:var(--ink-900)}
+    .opp-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .opp{display:flex;flex-direction:column;gap:10px;transition:.18s;padding:15px}
+    .opp:hover{border-color:rgba(99,102,241,.35);box-shadow:0 0 0 1px rgba(99,102,241,.14),0 18px 44px -30px rgba(99,102,241,.5)}
+    .opp-top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+    .opp-title{font-size:14px;font-weight:650;line-height:1.5}
+    .opp-meta{display:flex;flex-direction:column;gap:4px;font-size:11.5px;color:var(--muted)}
+    .opp-foot{display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid #eef2f7;padding-top:10px;margin-top:auto}
+    .money{font-size:17px;font-weight:650;font-variant-numeric:tabular-nums}
+    .tiny-label{font-family:var(--mono);font-size:8.5px;letter-spacing:.18em;color:var(--faint);text-transform:uppercase}
+    /* table */
+    .table-wrap{overflow-x:auto;border-radius:12px;border:1px solid #eef2f7}
+    table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:680px}
+    th{text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);background:#f8fafc;padding:10px 12px;border-bottom:1px solid #eef2f7;font-weight:600}
+    td{padding:11px 12px;border-bottom:1px solid #f4f6fa;vertical-align:middle}
+    tr:last-child td{border-bottom:0}
+    tbody tr:hover{background:#fbfcff}
+    .proj-name{font-weight:600}
+    .proj-code{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:2px}
+    .search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 10px;margin-bottom:12px}
+    .search input{border:0;outline:0;font-size:12.5px;width:220px;background:transparent;color:var(--text)}
+    /* templates */
+    .tpl-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .tpl{padding:15px;display:flex;flex-direction:column;gap:8px;transition:.18s}
+    .tpl.sel{border-color:rgba(99,102,241,.45);box-shadow:0 0 0 1px rgba(99,102,241,.18)}
+    .tpl h3{margin:0;font-size:13.5px}
+    .tpl p{margin:0;font-size:11.5px;color:var(--muted);line-height:1.6}
+    .tpl-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
+    .tag{font-size:10px;color:var(--muted);background:#f8fafc;border:1px solid #eef2f7;border-radius:6px;padding:2px 6px}
+    .skill-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .skill{display:flex;gap:10px;padding:12px;border:1px solid #eef2f7;border-radius:12px;background:#fbfcfe}
+    .skill-ico{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:rgba(212,175,55,.13);color:var(--gold-600);flex:0 0 26px}
+    .skill-name{font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px}
+    .skill-desc{font-size:11px;color:var(--faint);line-height:1.55;margin-top:3px}
+    /* compliance */
+    .findings{display:flex;flex-direction:column;gap:8px}
+    .finding{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1px solid #eef2f7;border-radius:11px;background:#fbfcfe}
+    .finding .body{min-width:0}
+    .finding .msg{font-size:12.5px;font-weight:600}
+    .finding .fix{font-size:11px;color:var(--faint);margin-top:3px;line-height:1.55}
+    .score-hero{display:flex;align-items:center;gap:18px;padding:14px;border-radius:12px;background:linear-gradient(135deg,rgba(99,102,241,.08),rgba(212,175,55,.08));border:1px solid rgba(99,102,241,.16)}
+    .score{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1}
+    .score small{font-size:13px;color:var(--faint);font-weight:500}
+    .bar{height:6px;border-radius:999px;background:#e8edf5;overflow:hidden;margin-top:6px}
+    .bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--indigo-500),var(--gold-500))}
+    /* data ops */
+    .ops-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .note{font-size:11px;color:var(--faint);line-height:1.6}
+    .switch{width:34px;height:18px;border-radius:999px;background:#e2e8f0;position:relative;display:inline-block;border:0;flex:0 0 34px}
+    .switch::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:.15s;box-shadow:0 1px 2px rgba(15,23,42,.2)}
+    .switch.on{background:var(--indigo-500)}
+    .switch.on::after{left:18px}
+    .field{display:flex;flex-direction:column;gap:5px;font-size:11.5px;color:var(--muted)}
+    .field input,.field select{border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:12.5px;background:#fff;color:var(--text);font-family:var(--sans)}
+    .field input:disabled{background:#f8fafc;color:#94a3b8}
+    .rule-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid #eef2f7;border-radius:11px;background:#fbfcfe}
+    .rule-row .name{font-size:12.5px;font-weight:600;min-width:0}
+    .rule-row .rid{font-family:var(--mono);font-size:9.5px;color:var(--faint);margin-top:2px}
+    .rule-row .spacer{flex:1}
+    .role-tags{display:flex;gap:4px;flex-wrap:wrap}
+    .banner{
+      display:flex;gap:9px;align-items:flex-start;border:1px solid rgba(212,175,55,.35);
+      background:rgba(212,175,55,.07);border-radius:12px;padding:10px 12px;font-size:11.5px;color:#6b5312;
+      margin-bottom:16px;
+    }
+    .banner b{font-weight:650}
+    footer{margin-top:26px;padding-top:16px;border-top:1px solid #e8edf5;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--faint)}
+    footer .ev{font-family:var(--mono);letter-spacing:.05em}
+    .fade-in{animation:fade .3s ease both}
+    @keyframes fade{from{opacity:0}to{opacity:1}}
+    @media (max-width:1180px){.kpis,.ops-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.tpl-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.opp-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.skill-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:900px){
+      .app{display:block}.sidebar{position:static;width:auto;height:auto;padding:16px 14px}
+      .nav{flex-direction:row;overflow-x:auto;gap:6px;margin-top:14px}.nav-group{display:contents}.nav-group-label{display:none}
+      .nav-btn{width:auto;white-space:nowrap;padding:8px 11px}.side-user{display:none}
+      .two-col{grid-template-columns:1fr}.content{padding:18px 14px 34px}.topbar{padding:0 14px}
+    }
+    @media (max-width:640px){.kpis,.ops-grid,.tpl-grid,.opp-grid,.skill-grid{grid-template-columns:1fr}.search input{width:100%}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
+      </span>
+      <div><div class="brand-title">BidCopilot</div><div class="brand-sub">AI BIDDING OS</div></div>
+    </div>
+    <span class="demo-chip"><i></i>STATIC DEMO</span>
+    <nav class="nav" aria-label="主导航">
+      <div class="nav-group">
+        <div class="nav-group-label">投标工作流</div>
+        <button class="nav-btn" data-view="command" aria-selected="true">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          指挥台
+        </button>
+        <button class="nav-btn" data-view="opps" aria-selected="false">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          机会中心
+        </button>
+        <button class="nav-btn" data-view="projects" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H9l2 2h7.5A2.5 2.5 0 0 1 21 9.5v8A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5z"/></svg>
+          投标项目
+        </button>
+        <button class="nav-btn" data-view="assets" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M4 21V8l8-5 8 5v13"/><path d="M9 21v-6h6v6"/></svg>
+          企业资产
+        </button>
+        <button class="nav-btn" data-view="knowledge" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          企业知识库
+        </button>
+        <button class="nav-btn" data-view="templates" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 18l9 5 9-5"/></svg>
+          模板与技能
+        </button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">评审与运营</div>
+        <button class="nav-btn" data-view="compliance" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"/><path d="M9.5 12l1.8 1.8 3.4-3.6"/></svg>
+          合规与评标
+        </button>
+        <button class="nav-btn admin-only" data-view="ops" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M6 16V9"/><path d="M11 16V5"/><path d="M16 16v-4"/></svg>
+          数据运营
+        </button>
+        <button class="nav-btn admin-only" data-view="audit" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+          审计日志
+        </button>
+        <button class="nav-btn admin-only" data-view="policies" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"/><path d="M9 12h6"/></svg>
+          合规策略
+        </button>
+        <button class="nav-btn admin-only" data-view="users" aria-selected="false">
+          <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5a3 3 0 0 1 0 6M18 14c2.3.6 4 2.6 4 5"/></svg>
+          用户管理
+        </button>
+        <button class="nav-btn admin-only" data-view="access" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          权限治理
+        </button>
+        <button class="nav-btn" data-view="settings" aria-selected="false">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21h-4v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3v-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-1.5V3h4v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.1v4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+          账号设置
+        </button>
+      </div>
+      <div class="nav-group admin-only">
+        <div class="nav-group-label">平台管理</div>
+        <button class="nav-btn" data-view="tenants" aria-selected="false">
+          <svg viewBox="0 0 24 24"><path d="M4 21V6l8-3 8 3v15"/><path d="M9 21v-5h6v5"/><path d="M8 9h.01M12 9h.01M16 9h.01M8 12h.01M12 12h.01M16 12h.01"/></svg>
+          平台租户
+        </button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">帮助</div>
+        <button class="nav-btn" data-view="help" aria-selected="false">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 4.2 1.8c-.8.7-1.2 1.2-1.2 2.2"/><path d="M12 17h.01"/></svg>
+          使用帮助
+        </button>
+      </div>
+    </nav>
+    <div class="side-user">
+      <span class="avatar">演</span>
+      <div><div class="side-user-name">演示用户</div><div class="side-user-sub" id="side-role">演示投标企业 · 管理员</div></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="crumb"><span class="slash">BIDDING /</span><span id="crumb-title">指挥台</span></div>
+      <div class="top-actions">
+        <div class="role-switch" role="group" aria-label="演示视角">
+          <button data-role="user" aria-pressed="false">平台用户</button>
+          <button data-role="admin" aria-pressed="true">管理员</button>
+        </div>
+        <span class="pill gold"><i></i>deepseek-flash</span>
+        <span class="pill indigo"><i></i>演示数据</span>
+        <span class="chip" style="position:relative" title="消息中心：订阅同步结果，未读 1 条">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9a6 6 0 1 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>
+          <span style="position:absolute;top:-4px;right:-4px;background:#e11d48;color:#fff;border-radius:999px;font-size:9px;line-height:14px;padding:0 4px">1</span>
+        </span>
+        <span class="avatar" style="width:34px;height:34px;border:1px solid #e2e8f0;background:#fff;color:#334155">演</span>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="banner">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:0 0 15px;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+        <div><b>这是静态演示站。</b>页面复刻真实产品界面，数据为示例；不提供登录、真实租户数据或在线 AI 调用。右上角可切换「平台用户 / 管理员」视角，菜单会按角色变化；真实系统支持私有化部署（Docker / Helm）。</div>
+      </div>
+
+      <!-- 指挥台 -->
+      <section class="view active" id="view-command" role="tabpanel" aria-label="指挥台">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">COMMAND DECK / 演示投标企业</p>
+            <h1>投标指挥台</h1>
+            <p class="subtitle">从真实商机到可追溯标书：解析、决策、生成、核查、合规与交付在同一条链路里完成。</p>
+          </div>
+          <button class="btn" data-goto="projects">查看投标项目
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+        <div class="grid kpis">
+          <div class="card kpi"><div><div class="kpi-label">中标率</div><div class="kpi-value">50%</div><div class="kpi-hint">已决 2 个</div></div><span class="kpi-icon tone-gold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16z"/><path d="M12 8v4l3 2"/></svg></span></div>
+          <div class="card kpi"><div><div class="kpi-label">已复盘</div><div class="kpi-value">2 个</div><div class="kpi-hint">中标 / 未中标 / 流标</div></div><span class="kpi-icon tone-indigo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3 7-7"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span></div>
+          <div class="card kpi"><div><div class="kpi-label">中标金额</div><div class="kpi-value">1,980,000</div><div class="kpi-hint">复盘累计</div></div><span class="kpi-icon tone-gold"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 9h6M9 15h6M12 7v10"/></svg></span></div>
+          <div class="card kpi"><div><div class="kpi-label">主要失标原因</div><div class="kpi-value" style="font-size:21px">报价 × 1</div><div class="kpi-hint">用于下一轮改进</div></div><span class="kpi-icon tone-slate"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 2.5 20h19L12 3z"/><path d="M12 9v5M12 17h.01"/></svg></span></div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <p class="card-title">生产链路 <span class="mono">PIPELINE</span></p>
+            <div class="stage-list">
+              <div class="stage"><span class="stage-no">1</span><div><div class="stage-name">解析与决策</div><div class="stage-desc">约束集 · 评分矩阵 · 资格预审 · Bid-No-Bid</div></div><span class="stage-state state-ok">已完成</span></div>
+              <div class="stage"><span class="stage-no">2</span><div><div class="stage-name">模板与大纲</div><div class="stage-desc">8 个章节 · 政采 IT 结构模板 · 材料四态</div></div><span class="stage-state state-ok">已生成</span></div>
+              <div class="stage"><span class="stage-no">3</span><div><div class="stage-name">生成与核查</div><div class="stage-desc">已审批 5/8 · 无源主张 2 条 · 证据可追溯</div></div><span class="stage-state state-warn">进行中</span></div>
+              <div class="stage"><span class="stage-no">4</span><div><div class="stage-name">合规与交付</div><div class="stage-desc">合规报告 1 份 · 暗标元数据已清空 · docx 可导出</div></div><span class="stage-state state-ok">可交付</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <p class="card-title">AI 引擎 <span class="mono">MODELS</span></p>
+            <div class="kv"><span>主模型</span><b class="mono">deepseek-flash</b></div>
+            <div class="kv"><span>判别 / 评标</span><b class="mono">Qwen3.5-4B-SemIf</b></div>
+            <div class="kv"><span>网关</span><b>OpenAI 兼容 · 内网</b></div>
+            <div class="kv"><span>状态</span><span class="badge b-green">在线</span></div>
+            <p class="note" style="margin-top:10px">生成与评标按租户模型配置解析；未配置时明确失败，不静默降级为规则草稿。</p>
+          </div>
+        </div>
+        <div class="grid opp-grid" style="margin-top:12px">
+          <div class="card opp">
+            <div class="opp-top"><span class="badge b-indigo">招标</span><span class="badge b-green">正文已拉取</span></div>
+            <div class="opp-title">某市政务云系统集成项目</div>
+            <div class="opp-meta"><span>某市大数据局 · 浙江</span><span>发布 2026-10-21 · 截止 2026-11-10</span></div>
+            <div class="opp-foot"><div><div class="tiny-label">BUDGET</div><div class="money">4,500,000</div></div><span class="badge b-gold">评分项 3</span></div>
+          </div>
+          <div class="card opp">
+            <div class="opp-top"><span class="badge b-indigo">招标</span><span class="badge b-green">正文已拉取</span></div>
+            <div class="opp-title">某区视频监控运维项目</div>
+            <div class="opp-meta"><span>某区公安分局 · 浙江</span><span>发布 2026-10-20 · 截止 2026-12-15</span></div>
+            <div class="opp-foot"><div><div class="tiny-label">BUDGET</div><div class="money">1,200,000</div></div><span class="badge b-gold">评分项 3</span></div>
+          </div>
+          <div class="card opp">
+            <div class="opp-top"><span class="badge b-indigo">招标</span><span class="badge b-amber">列表口径</span></div>
+            <div class="opp-title">某大学数据中心改造项目</div>
+            <div class="opp-meta"><span>某大学 · 上海</span><span>发布 2026-10-18 · 截止 2026-11-28</span></div>
+            <div class="opp-foot"><div><div class="tiny-label">BUDGET</div><div class="money">8,600,000</div></div><span class="badge b-slate">待拉正文</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 机会中心：数据接口商机 + 联网情报 -->
+      <section class="view" id="view-opps" role="tabpanel" aria-label="机会中心">
+        <div class="page-head"><div><p class="eyebrow">OPPORTUNITY INTELLIGENCE</p><h1>机会中心</h1><p class="subtitle">统一情报入口：KeepRisk 数据接口商机与联网检索线索分别标注来源；检索结果需人工核实。</p></div><span class="badge b-gold">演示数据</span></div>
+        <div class="filters" role="tablist" aria-label="情报来源" style="align-items:center">
+          <button class="chip active" data-opp-source="data" role="tab" aria-selected="true">数据接口商机</button>
+          <button class="chip" data-opp-source="web" role="tab" aria-selected="false">联网情报</button>
+          <span class="note" style="margin-left:auto">统一入口 · 来源分开标注</span>
+        </div>
+        <div id="opp-source-data">
+          <div class="filters">
+            <button class="chip active">全部</button><button class="chip">招标</button><button class="chip">拟建</button><button class="chip">中标</button><button class="chip">仅看收藏</button><button class="chip">只看新商机</button><button class="chip">订阅管理</button>
+          </div>
+          <div class="filters" style="align-items:center">
+            <span class="note">地区</span><span class="chip">广东</span>
+            <span class="note">行业</span><span class="chip">IT 信息化</span>
+            <span class="note">预算</span><span class="chip">100 万 ~ 1000 万</span>
+            <span class="note">发布</span><span class="chip">近 7 天</span>
+            <span class="note">排序</span><span class="chip active">订阅匹配度</span><span class="chip">发布时间</span><span class="chip">预算高→低</span>
+            <span class="note" style="margin-left:auto">启发式粗排 · 命中项来自启用订阅</span>
+          </div>
+          <div class="card" style="margin-bottom:12px">
+            <p class="card-title">竞争情报 <span class="mono">BUYER INTEL</span> <span class="badge b-indigo">采购人：某市大数据局</span> <span class="badge b-green">已同步 50 条</span></p>
+            <div class="table-wrap" style="margin-top:10px">
+              <table>
+                <thead><tr><th>中标厂商</th><th>中标次数</th><th>最近中标</th><th>累计中标额</th><th>标记</th></tr></thead>
+                <tbody>
+                  <tr><td class="proj-name">工业和信息化部电子第五研究所</td><td>3</td><td>2026-10-15</td><td>—</td><td><span class="badge b-amber">既有供应商</span></td></tr>
+                  <tr><td class="proj-name">广东数字政府研究院</td><td>2</td><td>2026-10-21</td><td>—</td><td><span class="badge b-amber">既有供应商</span> <span class="badge b-blue">已建档</span></td></tr>
+                  <tr><td class="proj-name">某新入围集成商</td><td>1</td><td>2026-10-13</td><td>1,063,594</td><td><span class="badge b-slate">无历史标记</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="note" style="margin-top:10px">按采购人名称检索 KeepRisk 中标类公告后聚合，属名称匹配的启发式结果；近 12 个月同一厂商中标 ≥ 2 次标记为「既有供应商」。投标决策前请人工核实。</p>
+          </div>
+          <div class="card" style="margin-bottom:12px">
+            <p class="card-title">商机订阅 <span class="mono">SUBSCRIPTIONS</span> <span class="badge b-indigo">定时同步</span> <span class="badge b-gold">按次计费</span></p>
+            <div class="kv"><span>政务云监控 · 关键词 政务云 · 每 30 分钟</span><span class="badge b-green">启用中 · 本轮新增 20 条</span></div>
+            <div class="kv"><span>信创终端 · 全量抓取 · 每 120 分钟</span><span class="badge b-slate">已停用 · 从未运行</span></div>
+            <p class="note" style="margin-top:10px">调度器按订阅间隔在容器内自动同步 KeepRisk；新增商机写入消息中心（顶栏铃铛），同步失败按上游状态原样提示，不降级为空列表。</p>
+          </div>
+          <div class="grid opp-grid">
+            <div class="card opp"><div class="opp-top"><span><span class="badge b-indigo">招标</span> <span class="badge b-green">命中 2 项</span></span><span class="badge b-green">正文已拉取</span></div><div class="opp-title">某市政务云系统集成项目</div><div class="opp-meta"><span>某市大数据局 · 浙江</span><span>预算 4,500,000 · 发布 2026-10-21</span></div><div class="opp-foot"><span class="badge b-slate">DEMO-2026-001</span><span class="badge b-gold">已收藏</span></div></div>
+            <div class="card opp"><div class="opp-top"><span class="badge b-indigo">招标</span><span class="badge b-green">正文已拉取</span></div><div class="opp-title">某区视频监控运维项目</div><div class="opp-meta"><span>某区公安分局 · 浙江</span><span>预算 1,200,000 · 发布 2026-10-20</span></div><div class="opp-foot"><span class="badge b-slate">DEMO-2026-002</span><span class="badge b-slate">未收藏</span></div></div>
+            <div class="card opp"><div class="opp-top"><span class="badge b-indigo">招标</span><span class="badge b-amber">列表口径</span></div><div class="opp-title">某大学数据中心改造项目</div><div class="opp-meta"><span>某大学 · 上海</span><span>预算 8,600,000 · 发布 2026-10-18</span></div><div class="opp-foot"><span class="badge b-slate">DEMO-2026-003</span><span class="badge b-slate">未收藏</span></div></div>
+            <div class="card opp"><div class="opp-top"><span class="badge b-blue">中标</span><span class="badge b-amber">列表口径</span></div><div class="opp-title">某集团信创终端采购</div><div class="opp-meta"><span>某集团 · 北京</span><span>中标额 3,200,000 · 发布 2026-10-17</span></div><div class="opp-foot"><span class="badge b-slate">DEMO-2026-004</span><span class="badge b-slate">未收藏</span></div></div>
+            <div class="card opp"><div class="opp-top"><span class="badge b-slate">拟建</span><span class="badge b-amber">列表口径</span></div><div class="opp-title">某区智慧交通一期</div><div class="opp-meta"><span>某区交通局 · 广东</span><span>预算 12,000,000 · 发布 2026-10-16</span></div><div class="opp-foot"><span class="badge b-slate">DEMO-2026-005</span><span class="badge b-slate">未收藏</span></div></div>
+            <div class="card opp"><div class="opp-top"><span class="badge b-indigo">招标</span><span class="badge b-green">正文已拉取</span></div><div class="opp-title">某市医疗设备采购项目</div><div class="opp-meta"><span>某市卫健委 · 江苏</span><span>预算 1,980,000 · 发布 2026-10-19</span></div><div class="opp-foot"><span class="badge b-slate">DEMO-2026-006</span><span class="badge b-gold">已收藏</span></div></div>
+          </div>
+          <p class="note" style="margin-top:12px">演示数据。真实机会来源为 KeepRisk，同步与详情调用写入成本台账。</p>
+        </div>
+        <div id="opp-source-web" hidden>
+          <div class="two-col" style="margin-top:12px">
+            <div class="card">
+              <p class="card-title">联网检索 <span class="mono">QUERY</span> <span class="badge b-amber">deepseek 未配置</span></p>
+              <div class="kv"><span>查询：某市 政务云 运维 中标 厂商</span><span class="badge b-blue">5 条</span></div>
+              <div class="kv"><span>Provider</span><span class="badge b-indigo">deepseek</span></div>
+              <div class="kv"><span>状态来源</span><span class="badge b-slate">GET /system/ai-status</span></div>
+              <p class="note" style="margin-top:10px">真实接口 <code>POST /api/v1/web-search</code> 已接入 DeepSeek 与 MiniMax 两种契约；结果只作线索，不写入 KeepRisk 商机库，也不作为标书事实来源。</p>
+            </div>
+            <div class="card">
+              <p class="card-title">结果线索 <span class="mono">LEADS</span> <span class="badge b-slate">需人工核实</span></p>
+              <div class="kv"><span>某市政务云运维项目中标公告</span><span class="badge b-slate">待核实</span></div>
+              <div class="kv"><span>竞对厂商公开案例与资质</span><span class="badge b-slate">待核实</span></div>
+              <div class="kv"><span>行业运维服务价格区间</span><span class="badge b-slate">待核实</span></div>
+              <p class="note" style="margin-top:10px">每次检索写成本台账与审计链；结果目前不落原始快照，引用前必须人工确认。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 投标项目 -->
+      <section class="view" id="view-projects" role="tabpanel" aria-label="投标项目">
+        <div class="page-head"><div><p class="eyebrow">PORTFOLIO / DELIVERY</p><h1>投标项目</h1><p class="subtitle">从机会转项目，沿模板、生成、核查、合规与导出推进；结果复盘反哺赢率。</p></div><span class="badge b-gold">演示数据</span></div>
+        <div class="grid kpis">
+          <div class="card"><div class="kpi-label">中标率</div><div class="kpi-value">50%</div><div class="kpi-hint">已决 2 个</div></div>
+          <div class="card"><div class="kpi-label">已复盘</div><div class="kpi-value">2 个</div><div class="kpi-hint">流标单列不计入分母</div></div>
+          <div class="card"><div class="kpi-label">中标金额</div><div class="kpi-value">1,980,000</div><div class="kpi-hint">复盘累计</div></div>
+          <div class="card"><div class="kpi-label">主要失标原因</div><div class="kpi-value" style="font-size:21px">报价 × 1</div><div class="kpi-hint">用于下一轮改进</div></div>
+        </div>
+        <div class="card">
+          <div class="search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="proj-search" placeholder="筛选项目名称 / 采购人" aria-label="筛选项目" /></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>项目</th><th>采购人</th><th>截止时间</th><th>状态</th><th>决策</th><th>评分</th></tr></thead>
+              <tbody id="proj-body">
+                <tr data-text="某市政务云系统集成项目 某市大数据局"><td><div class="proj-name">某市政务云系统集成项目</div><div class="proj-code">DEMO-2026-001</div></td><td>某市大数据局</td><td>2026-11-10 09:00</td><td><span class="badge b-green">won</span></td><td><span class="badge b-green">Go</span></td><td><b>84</b> / 100</td></tr>
+                <tr data-text="某区视频监控运维项目 某区公安分局"><td><div class="proj-name">某区视频监控运维项目</div><div class="proj-code">DEMO-2026-002</div></td><td>某区公安分局</td><td>2026-12-15 09:00</td><td><span class="badge b-blue">active</span></td><td><span class="badge b-amber">Conditional Go</span></td><td>—</td></tr>
+                <tr data-text="某县医院设备采购 某县人民医院"><td><div class="proj-name">某县医院设备采购</div><div class="proj-code">DEMO-2026-003</div></td><td>某县人民医院</td><td>2026-11-25 17:00</td><td><span class="badge b-rose">lost</span></td><td><span class="badge b-rose">No-Go</span></td><td><b>61</b> / 100</td></tr>
+                <tr data-text="模板验收项目"><td><div class="proj-name">模板验收项目</div><div class="proj-code">—</div></td><td>—</td><td>2026-12-01 09:00</td><td><span class="badge b-blue">active</span></td><td><span class="badge b-slate">未决策</span></td><td>—</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p class="note" style="margin-top:12px">演示数据。真实项目支持上传 docx/pdf、约束集、评分矩阵、资格预审、章节审批与暗标导出。</p>
+      </section>
+
+      <!-- 模板与技能 -->
+      <section class="view" id="view-templates" role="tabpanel" aria-label="模板与技能">
+        <div class="page-head"><div><p class="eyebrow">TEMPLATES / SKILLS</p><h1>模板与技能</h1><p class="subtitle">结构模板决定章节骨架，格式模板决定 docx 版式；能力以受控模块注册，不在运行时执行任意脚本。</p></div><span class="badge b-gold">演示数据</span></div>
+        <div class="grid tpl-grid">
+          <div class="card tpl sel"><div class="opp-top"><span class="badge b-indigo">结构模板</span><span class="badge b-green">selected</span></div><h3>政采 IT 服务</h3><p>投标函、资格证明、技术方案、商务响应、服务承诺。</p><div class="tpl-tags"><span class="tag">builtin.gov_it</span><span class="tag">8 章节</span></div></div>
+          <div class="card tpl"><div class="opp-top"><span class="badge b-indigo">结构模板</span></div><h3>政府采购货物</h3><p>报价、技术参数响应、售后与交付、商务条款。</p><div class="tpl-tags"><span class="tag">builtin.gov_goods</span><span class="tag">7 章节</span></div></div>
+          <div class="card tpl"><div class="opp-top"><span class="badge b-indigo">结构模板</span></div><h3>工程建设</h3><p>施工组织设计、进度、质量安全、人员设备。</p><div class="tpl-tags"><span class="tag">builtin.engineering</span><span class="tag">9 章节</span></div></div>
+          <div class="card tpl"><div class="opp-top"><span class="badge b-indigo">结构模板</span></div><h3>企业通用</h3><p>公司实力、业绩、方案、服务与承诺。</p><div class="tpl-tags"><span class="tag">builtin.enterprise_general</span><span class="tag">6 章节</span></div></div>
+        </div>
+        <div class="two-col" style="margin-top:12px">
+          <div class="card">
+            <p class="card-title">格式模板 <span class="mono">FORMAT</span></p>
+            <div class="kv"><span>政采标准格式</span><b>A4 · 宋体小四 · 1.5 倍行距 · 页码</b></div>
+            <div class="kv"><span>企业通用格式</span><b>A4 · 仿宋四号 · 固定行距 · 页脚</b></div>
+            <p class="note" style="margin-top:8px">导出时按格式包应用页边距、正文/标题字体字号、首行缩进与页脚页码；暗标导出额外清空文档核心属性。</p>
+          </div>
+          <div class="card">
+            <p class="card-title">材料四态 <span class="mono">MATERIALS</span></p>
+            <div class="kv"><span>available 已匹配</span><span class="badge b-green">资质 / 人员 / 业绩</span></div>
+            <div class="kv"><span>unknown 待确认</span><span class="badge b-amber">1</span></div>
+            <div class="kv"><span>missing 缺失</span><span class="badge b-rose">1</span></div>
+            <div class="kv"><span>to_write 需编写</span><span class="badge b-slate">2</span></div>
+            <p class="note" style="margin-top:8px">材料状态按模板要求与企业台账比对，缺证据不伪造通过。</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <p class="card-title">技能目录 <span class="mono">SKILLS</span></p>
+          <div class="grid skill-grid">
+            <div class="skill"><span class="skill-ico">1</span><div><div class="skill-name">招标文件解析 <span class="badge b-green">ready</span></div><div class="skill-desc">docx/pdf/OCR → 约束集、评分项、资格、时间、预算、清单。</div></div></div>
+            <div class="skill"><span class="skill-ico">2</span><div><div class="skill-name">资格预审 <span class="badge b-green">ready</span></div><div class="skill-desc">逐条 PASS/FAIL/UNKNOWN，缺证据不伪造通过。</div></div></div>
+            <div class="skill"><span class="skill-ico">3</span><div><div class="skill-name">Bid-No-Bid <span class="badge b-green">ready</span></div><div class="skill-desc">资格、矩阵覆盖、预算与风险因子输出 Go / Conditional Go / No-Go。</div></div></div>
+            <div class="skill"><span class="skill-ico">4</span><div><div class="skill-name">结构模板 <span class="badge b-green">ready</span></div><div class="skill-desc">政采/工程/企业通用模板，合并评分项生成大纲。</div></div></div>
+            <div class="skill"><span class="skill-ico">5</span><div><div class="skill-name">素材清单 <span class="badge b-green">ready</span></div><div class="skill-desc">按模板要求比对资质、人员、业绩，标记缺失与待编写。</div></div></div>
+            <div class="skill"><span class="skill-ico">6</span><div><div class="skill-name">章节生成 <span class="badge b-green">ready</span></div><div class="skill-desc">规则草稿或 OpenAI 兼容网关；未配置明确失败。</div></div></div>
+            <div class="skill"><span class="skill-ico">7</span><div><div class="skill-name">主张级核查 <span class="badge b-green">ready</span></div><div class="skill-desc">金额/日期/比例/工期/标准逐条匹配来源，无源标红。</div></div></div>
+            <div class="skill"><span class="skill-ico">8</span><div><div class="skill-name">确定性合规 <span class="badge b-green">ready</span></div><div class="skill-desc">23 条规则：暗标、格式、资格、证据、清单、时间、空章节、跨章节数值一致、逐条响应闭环（可批量标记）。</div></div></div>
+            <div class="skill"><span class="skill-ico">9</span><div><div class="skill-name">暗标脱敏 <span class="badge b-green">ready</span></div><div class="skill-desc">企业/人员名称替换与文档元数据清理。</div></div></div>
+            <div class="skill"><span class="skill-ico">10</span><div><div class="skill-name">格式排版导出 <span class="badge b-green">ready</span></div><div class="skill-desc">按格式包输出 docx；审批后才可导出，逐条响应未闭环时默认拦下，确认风险才强制放行并留审计。</div></div></div>
+            <div class="skill"><span class="skill-ico">11</span><div><div class="skill-name">AI 评标模拟 <span class="badge b-green">ready</span></div><div class="skill-desc">判别模型逐项评分、证据、缺口与整改建议。</div></div></div>
+            <div class="skill"><span class="skill-ico">12</span><div><div class="skill-name">相似度 / 报价异常 <span class="badge b-green">ready</span></div><div class="skill-desc">跨章节重复段落、超预算与异常低价确定性检查。</div></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 合规与评标 -->
+      <section class="view" id="view-compliance" role="tabpanel" aria-label="合规与评标">
+        <div class="page-head"><div><p class="eyebrow">COMPLIANCE / EVALUATION</p><h1>合规与评标</h1><p class="subtitle">确定性规则扫描不调用 LLM；AI 评标按评分项逐条评分并引用章节证据，缺口与需复核项显式标注。</p></div><span class="badge b-gold">演示数据</span></div>
+        <div class="two-col">
+          <div class="card">
+            <p class="card-title">合规预检 <span class="mono">24 RULES</span></p>
+            <div class="filters"><span class="badge b-rose">high 2</span><span class="badge b-amber">medium 1</span><span class="badge b-slate">low 1</span><span class="badge b-green">已通过 14</span></div>
+            <div class="findings" id="findings">
+              <div class="finding"><span class="badge b-rose">HIGH</span><div class="body"><div class="msg">QUAL-FAIL-001 · 资格要求 FAIL</div><div class="fix">“近三年不少于 2 个类似运输服务业绩”未满足；建议补齐业绩证明或调整投标策略。</div></div></div>
+              <div class="finding"><span class="badge b-amber">MEDIUM</span><div class="body"><div class="msg">QUAL-UNKNOWN-001 · 资格要求 UNKNOWN</div><div class="fix">“道路运输经营许可证”缺少企业资产证据；不伪造通过，需人工确认。</div></div></div>
+              <div class="finding"><span class="badge b-rose">HIGH</span><div class="body"><div class="msg">EVID-UNSOURCED-001 · 无源事实主张</div><div class="fix">正文出现“2026-09-20”，与招标正文不一致；事实核查标记为无源，提交前须复核。</div></div></div>
+              <div class="finding"><span class="badge b-slate">LOW</span><div class="body"><div class="msg">CONTENT-EMPTY-001 · 章节内容为空</div><div class="fix">“投标函”尚未生成内容；导出前需完成并为空章节补充材料。</div></div></div>
+            </div>
+            <p class="note" style="margin-top:10px">非暗标项目不触发 DARK-META 检查；暗标项目导出时清空 author/comments 等核心属性。</p>
+          </div>
+          <div class="card">
+            <p class="card-title">AI 评标模拟 <span class="mono">JUDGE</span></p>
+            <div class="score-hero">
+              <div><div class="tiny-label">TOTAL SCORE</div><div class="score">84<small> / 100</small></div></div>
+              <div style="flex:1"><div class="kv" style="border:0;padding:0 0 4px"><span>得分率</span><b>84%</b></div><div class="bar"><i style="width:84%"></i></div><div class="kv" style="border:0;padding:6px 0 0"><span>评级</span><span class="badge b-green">强</span></div></div>
+            </div>
+            <div class="table-wrap" style="margin-top:12px">
+              <table style="min-width:0">
+                <thead><tr><th>评分项</th><th>得分</th><th>证据</th><th>缺口</th></tr></thead>
+                <tbody>
+                  <tr><td>技术方案</td><td><b>38</b> / 50</td><td>3</td><td><span class="badge b-amber">1</span></td></tr>
+                  <tr><td>项目团队</td><td><b>16</b> / 20</td><td>2</td><td><span class="badge b-slate">0</span></td></tr>
+                  <tr><td>投标报价</td><td><b>30</b> / 30</td><td>1</td><td><span class="badge b-slate">0</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="note" style="margin-top:10px">演示评分。真实评标由 Qwen3.5-4B-SemIf 逐项给出理由、证据、缺口与 needs_review，模型/提示词版本可追溯；judge 超时会显式回退主模型并记录。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 数据运营 -->
+      <section class="view" id="view-ops" role="tabpanel" aria-label="数据运营">
+        <div class="page-head"><div><p class="eyebrow">DATA OPERATIONS</p><h1>数据运营</h1><p class="subtitle">每一次 KeepRisk 调用都有成本台账行；orderNo/charge 可对账，源健康可看到成功率与最近失败。</p></div><span class="badge b-gold">演示数据</span></div>
+        <div class="grid ops-grid">
+          <div class="card"><div class="kpi-label">调用总数</div><div class="kpi-value">1</div><div class="kpi-hint">近 30 天</div></div>
+          <div class="card"><div class="kpi-label">计费调用</div><div class="kpi-value">1</div><div class="kpi-hint">charged=true</div></div>
+          <div class="card"><div class="kpi-label">失败调用</div><div class="kpi-value">0</div><div class="kpi-hint">显式失败不静默重试</div></div>
+          <div class="card"><div class="kpi-label">落库行数</div><div class="kpi-value">20</div><div class="kpi-hint">E_007_1271</div></div>
+        </div>
+        <div class="two-col" style="margin-top:12px">
+          <div class="card">
+            <p class="card-title">最近调用 <span class="mono">RECENT</span></p>
+            <div class="table-wrap">
+              <table style="min-width:0">
+                <thead><tr><th>pcode</th><th>操作</th><th>状态</th><th>orderNo</th><th>计费</th><th>行数</th></tr></thead>
+                <tbody><tr><td class="mono">E_007_1271</td><td>opportunity.list</td><td><span class="badge b-green">succeeded</span></td><td class="mono">1562495965516800000</td><td><span class="badge b-gold">yes</span></td><td>20</td></tr></tbody>
+              </table>
+            </div>
+            <p class="note" style="margin-top:10px">演示数据。真实台账按租户隔离，失败调用保留错误码与时间。</p>
+          </div>
+          <div class="card">
+            <p class="card-title">源健康 <span class="mono">SOURCES</span></p>
+            <div class="kv"><span>KeepRisk</span><span class="badge b-green">运行正常</span></div>
+            <div class="kv"><span>近 30 天成功率</span><b>100%</b></div>
+            <div class="kv"><span>最近同步</span><b class="mono">2026-10-21 08:01</b></div>
+            <div class="kv"><span>最近失败</span><span class="badge b-slate">无</span></div>
+            <p class="note" style="margin-top:10px">源状态按 DataResult 原样透传：unavailable / rate_limited / unauthorized / contract_error 不会降级为空列表。</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <p class="card-title">付费调用配额 <span class="mono">PAID CALL QUOTA</span></p>
+          <div class="kv"><span>日配额</span><b>1,000 次 / 租户</b></div>
+          <div class="kv"><span>月配额</span><b>20,000 次 / 租户</b></div>
+          <div class="kv"><span>预占与释放</span><span class="badge b-green">原子预占 · 未计费自动释放</span></div>
+          <div class="kv"><span>超限</span><span class="badge b-rose">429 quota_exceeded</span></div>
+          <p class="note" style="margin-top:10px">KeepRisk 同步、采购人情报、公司概况/历史与联网检索统一受配额约束；配额可在环境变量中调整，0 表示关闭。</p>
+        </div>
+      </section>
+
+      <!-- 企业资产 -->
+      <section class="view" id="view-assets" role="tabpanel" aria-label="企业资产">
+        <div class="page-head"><div><p class="eyebrow">ASSET LEDGER</p><h1>企业资产</h1><p class="subtitle">资质、人员、业绩、信用是资格预审与评分证据的真实来源；支持 CSV/XLSX 导入并幂等更新。</p></div><span class="badge b-gold">演示数据</span></div>
+        <div class="grid kpis">
+          <div class="card"><div class="kpi-label">资质</div><div class="kpi-value">4</div><div class="kpi-hint">1 项 90 天内到期</div></div>
+          <div class="card"><div class="kpi-label">人员</div><div class="kpi-value">3</div><div class="kpi-hint">PMP / 高级项目经理</div></div>
+          <div class="card"><div class="kpi-label">业绩</div><div class="kpi-value">5</div><div class="kpi-hint">近三年 3 项</div></div>
+          <div class="card"><div class="kpi-label">信用</div><div class="kpi-value">2</div><div class="kpi-hint">无失信记录</div></div>
+        </div>
+        <div class="two-col" style="margin-top:12px">
+          <div class="card">
+            <p class="card-title">资产台账 <span class="mono">LEDGER</span></p>
+            <div class="table-wrap">
+              <table style="min-width:0">
+                <thead><tr><th>类型</th><th>名称</th><th>明细</th><th>有效期 / 日期</th><th>来源</th></tr></thead>
+                <tbody>
+                  <tr><td><span class="badge b-indigo">资质</span></td><td>信息系统集成及服务资质</td><td>二级</td><td>2027-12-31</td><td><span class="badge b-blue">import</span></td></tr>
+                  <tr><td><span class="badge b-indigo">资质</span></td><td>涉密信息系统集成资质</td><td>乙级</td><td>2027-06-30</td><td><span class="badge b-slate">manual</span></td></tr>
+                  <tr><td><span class="badge b-gold">人员</span></td><td>张工</td><td>高级 · PMP</td><td>2027-06-30</td><td><span class="badge b-blue">import</span></td></tr>
+                  <tr><td><span class="badge b-gold">人员</span></td><td>李工</td><td>信息系统项目管理师</td><td>2028-03-31</td><td><span class="badge b-slate">manual</span></td></tr>
+                  <tr><td><span class="badge b-green">业绩</span></td><td>某市政务云平台建设项目</td><td>1,850,000 元</td><td>2025-09-30</td><td><span class="badge b-blue">import</span></td></tr>
+                  <tr><td><span class="badge b-green">业绩</span></td><td>某区视频监控运维项目</td><td>960,000 元</td><td>2025-06-15</td><td><span class="badge b-slate">manual</span></td></tr>
+                  <tr><td><span class="badge b-slate">信用</span></td><td>信用中国查询</td><td>无失信</td><td>2026-10-01</td><td><span class="badge b-slate">manual</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="note" style="margin-top:10px">CSV/XLSX 导入按企业 + 资产去重键幂等更新；行级错误返回行号与字段。</p>
+          </div>
+          <div class="card">
+            <p class="card-title">到期提醒 <span class="mono">EXPIRING</span></p>
+            <div class="kv"><span>涉密信息系统集成资质</span><span class="badge b-amber">90 天内</span></div>
+            <div class="kv"><span>张工 · PMP</span><span class="badge b-amber">90 天内</span></div>
+            <div class="kv"><span>安全生产许可证</span><span class="badge b-rose">已过期</span></div>
+            <div class="kv"><span>信息系统集成资质</span><span class="badge b-green">有效</span></div>
+            <p class="note" style="margin-top:10px">资格预审与合规扫描会引用有效期；过期资产在合规报告中标出，不自动判定为通过。</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <p class="card-title">部门归属与字段脱敏 <span class="mono">DEPT / FIELD POLICY</span></p>
+          <div class="kv"><span>企业共享资产</span><span class="badge b-indigo">全员按 asset:read 可见</span></div>
+          <div class="kv"><span>部门专属资产</span><span class="badge b-blue">部门成员 / 经理 / 显式 ACL</span></div>
+          <div class="kv"><span>证书编号</span><span class="badge b-amber">低 clearance · mask</span></div>
+          <div class="kv"><span>合同金额</span><span class="badge b-rose">低 clearance · hide</span></div>
+          <p class="note" style="margin-top:10px">生成、合规扫描与素材清单都按发起用户的可见范围加载资产；字段策略在列表、详情和导出前统一应用，不能只靠前端隐藏。</p>
+        </div>
+      </section>
+
+      <!-- 企业知识库 -->
+      <section class="view" id="view-knowledge" role="tabpanel" aria-label="企业知识库">
+        <div class="page-head"><div><p class="eyebrow">KNOWLEDGE / RECALL</p><h1>企业知识库</h1><p class="subtitle">产品资料、方案、案例与图片统一入库；生成标书时按章节召回，只引用知识库中的真实内容与图片。</p></div><span class="badge b-gold">演示数据</span></div>
+        <div class="grid kpis">
+          <div class="card"><div class="kpi-label">文档</div><div class="kpi-value">2</div><div class="kpi-hint">docx / pdf / xlsx / pptx</div></div>
+          <div class="card"><div class="kpi-label">分块</div><div class="kpi-value">18</div><div class="kpi-hint">中文二元组 + IDF</div></div>
+          <div class="card"><div class="kpi-label">图片资产</div><div class="kpi-value">6</div><div class="kpi-hint">敏感图 2 张不参与暗标</div></div>
+          <div class="card"><div class="kpi-label">召回策略</div><div class="kpi-value" style="font-size:20px">关键词/IDF</div><div class="kpi-hint">标题 ×1.5 · 标签 ×1.2</div></div>
+        </div>
+        <div class="two-col" style="margin-top:12px">
+          <div class="card">
+            <p class="card-title">知识空间与 ACL <span class="mono">SCOPES / ACL</span></p>
+            <div class="kv"><span>企业知识库</span><span class="badge b-indigo">tenant</span></div>
+            <div class="kv"><span>部门知识库</span><span class="badge b-blue">org_unit · 含子部门可配</span></div>
+            <div class="kv"><span>个人知识库</span><span class="badge b-slate">personal · 仅本人</span></div>
+            <p class="note" style="margin-top:10px">库和文档都可授权给用户 / 部门 / 整个企业；四级密级 public/internal/confidential/restricted 与用户 clearance 共同判定。个人库不参与共享。</p>
+          </div>
+          <div class="card">
+            <p class="card-title">权限感知召回 <span class="mono">AUTHZ RECALL</span></p>
+            <div class="kv"><span>召回范围</span><b>仅当前用户可访问的知识库</b></div>
+            <div class="kv"><span>返回前复核</span><span class="badge b-green">ACL + 密级</span></div>
+            <div class="kv"><span>个人库调阅</span><span class="badge b-amber">break-glass 只读</span></div>
+            <p class="note" style="margin-top:10px">检索、生成引用和导出使用同一套判定；未授权内容不会进入模型上下文。管理员调阅个人正文需审批、限时并写审计链。</p>
+          </div>
+        </div>
+        <div class="two-col" style="margin-top:12px">
+          <div class="card">
+            <p class="card-title">已入库文档 <span class="mono">DOCUMENTS</span></p>
+            <div class="table-wrap">
+              <table style="min-width:0">
+                <thead><tr><th>标题</th><th>类型</th><th>标签</th><th>字数</th><th>状态</th></tr></thead>
+                <tbody>
+                  <tr><td>星云运维平台产品说明</td><td><span class="badge b-indigo">产品资料</span></td><td>运维、政务云</td><td>6,420</td><td><span class="badge b-green">parsed</span></td></tr>
+                  <tr><td>双活架构技术方案</td><td><span class="badge b-indigo">方案</span></td><td>双活、架构</td><td>3,180</td><td><span class="badge b-green">parsed</span></td></tr>
+                  <tr><td>政务云运维案例集</td><td><span class="badge b-indigo">案例</span></td><td>政务云、运维</td><td>2,450</td><td><span class="badge b-green">parsed</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="note" style="margin-top:10px">文档详情可查看解析预览、分块与关键词；标题、类型、标签可直接修订，保存后立即影响召回权重。docx 表格按行合并入库，分块保留标题与关键词，单文档最多返回 2 块。</p>
+          </div>
+          <div class="card">
+            <p class="card-title">召回测试 <span class="mono">RECALL</span></p>
+            <div class="kv"><span>查询：技术方案 双活架构</span><span class="badge b-blue">score 11.1</span></div>
+            <div class="kv"><span>双活架构技术方案 · 架构设计章节</span><span class="badge b-green">命中</span></div>
+            <div class="kv"><span>星云运维平台产品说明 · 平台能力</span><span class="badge b-green">命中</span></div>
+            <div class="kv"><span>图片：双活架构图</span><span class="badge b-green">可用</span></div>
+            <div class="kv"><span>图片：项目验收现场（含人员）</span><span class="badge b-amber">敏感 · 已排除</span></div>
+            <p class="note" style="margin-top:10px">章节编辑器可展开“本节知识召回”，生成前就能看到将引用的片段与图片；模型只能引用召回列表内的图片。</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <p class="card-title">图片资产 <span class="mono">IMAGES</span></p>
+          <div class="kv"><span>双活架构</span><span class="badge b-green">可用</span></div>
+          <div class="kv"><span>运维平台界面</span><span class="badge b-green">可用</span></div>
+          <div class="kv"><span>项目验收现场（含人员）</span><span class="badge b-amber">敏感 · 暗标排除</span></div>
+          <div class="kv"><span>资质证书</span><span class="badge b-amber">敏感 · 暗标排除</span></div>
+          <p class="note" style="margin-top:10px">暗标导出会排除敏感图片，并剥离 PNG/JPEG 元数据；普通导出保留企业可用图片与题注。图片支持 png/jpg/jpeg/webp（webp 入库统一转 PNG）。</p>
+        </div>
+      </section>
+
+      <!-- 审计日志 -->
+      <section class="view" id="view-audit" role="tabpanel" aria-label="审计日志">
+        <div class="page-head"><div><p class="eyebrow">AUDIT / HASH CHAIN</p><h1>审计日志</h1><p class="subtitle">敏感操作全程留痕，SHA-256 哈希链可校验；篡改任意一条历史事件都会导致链校验失败。</p></div><span class="badge b-gold">演示数据</span></div>
+        <div class="grid kpis">
+          <div class="card"><div class="kpi-label">哈希链状态</div><div class="kpi-value" style="font-size:22px;color:var(--green)">valid</div><div class="kpi-hint">SHA-256 · 逐条链接</div></div>
+          <div class="card"><div class="kpi-label">事件总数</div><div class="kpi-value">80</div><div class="kpi-hint">当前租户</div></div>
+          <div class="card"><div class="kpi-label">最近校验</div><div class="kpi-value" style="font-size:20px">刚刚</div><div class="kpi-hint">/audit/verify</div></div>
+          <div class="card"><div class="kpi-label">失败操作</div><div class="kpi-value">0</div><div class="kpi-hint">失败同样留痕</div></div>
+        </div>
+        <div class="card" style="margin-top:12px">
+          <div class="filters"><button class="chip active">全部</button><button class="chip">action</button><button class="chip">resource_type</button><button class="chip">仅失败</button></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>时间</th><th>动作</th><th>操作人</th><th>资源</th><th>结果</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">2026-10-22 10:48</td><td>project.generate</td><td>演示用户</td><td>bid_project</td><td><span class="badge b-green">ok</span></td></tr>
+                <tr><td class="mono">2026-10-22 10:44</td><td>compliance.scan</td><td>演示用户</td><td>bid_project</td><td><span class="badge b-green">ok</span></td></tr>
+                <tr><td class="mono">2026-10-22 10:39</td><td>asset.import</td><td>张工</td><td>personnel</td><td><span class="badge b-green">imported=1</span></td></tr>
+                <tr><td class="mono">2026-10-22 10:31</td><td>user.update</td><td>演示用户</td><td>user</td><td><span class="badge b-green">ok</span></td></tr>
+                <tr><td class="mono">2026-10-22 10:22</td><td>opportunity.favorite</td><td>演示用户</td><td>opportunity</td><td><span class="badge b-green">ok</span></td></tr>
+                <tr><td class="mono">2026-10-22 10:15</td><td>audit.verify</td><td>演示用户</td><td>tenant</td><td><span class="badge b-green">valid=true</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note" style="margin-top:10px">演示数据。审计事件与业务写入同事务落库；跨租户读取返回 404。</p>
+        </div>
+      </section>
+
+      <!-- 合规策略 -->
+      <section class="view" id="view-policies" role="tabpanel" aria-label="合规策略">
+        <div class="page-head"><div><p class="eyebrow">COMPLIANCE POLICIES</p><h1>合规策略</h1><p class="subtitle">24 条确定性规则可按租户启用/停用并覆盖严重级别；扫描引擎按策略过滤，摘要记录 policy_overrides。</p></div><span class="badge b-gold">演示数据</span></div>
+        <div class="card">
+          <div class="filters"><span class="badge b-green">启用 17</span><span class="badge b-slate">停用 1</span><span class="badge b-indigo">覆盖严重级别 2</span><button class="btn ghost" style="margin-left:auto;padding:6px 10px;font-size:11.5px">恢复默认</button></div>
+          <div class="findings">
+            <div class="rule-row"><div><div class="name">暗标正文身份信息</div><div class="rid">DARK-NAME-001 · HARD</div></div><div class="spacer"></div><span class="badge b-rose">high</span><button class="switch on" aria-label="启用暗标正文身份信息" aria-pressed="true"></button></div>
+            <div class="rule-row"><div><div class="name">文档元数据泄露</div><div class="rid">DARK-META-001 · HARD</div></div><div class="spacer"></div><span class="badge b-rose">high</span><button class="switch on" aria-label="启用文档元数据泄露" aria-pressed="true"></button></div>
+            <div class="rule-row"><div><div class="name">正文字体不符合要求</div><div class="rid">FORMAT-FONT-001 · SOFT</div></div><div class="spacer"></div><span class="badge b-amber">medium</span><button class="switch on" aria-label="启用正文字体" aria-pressed="true"></button></div>
+            <div class="rule-row"><div><div class="name">A4 页面与页边距</div><div class="rid">FORMAT-PAGE-001 · SOFT</div></div><div class="spacer"></div><span class="badge b-amber">medium</span><button class="switch on" aria-label="启用页面格式" aria-pressed="true"></button></div>
+            <div class="rule-row"><div><div class="name">资格要求 FAIL</div><div class="rid">QUAL-FAIL-001 · HARD</div></div><div class="spacer"></div><span class="badge b-rose">high</span><button class="switch on" aria-label="启用资格 FAIL" aria-pressed="true"></button></div>
+            <div class="rule-row"><div><div class="name">资格要求 UNKNOWN</div><div class="rid">QUAL-UNKNOWN-001 · SOFT</div></div><div class="spacer"></div><span class="badge b-amber">medium</span><button class="switch on" aria-label="启用资格 UNKNOWN" aria-pressed="true"></button></div>
+            <div class="rule-row"><div><div class="name">资产有效期</div><div class="rid">QUAL-EXPIRY-001 · SOFT</div></div><div class="spacer"></div><span class="badge b-amber">medium</span><button class="switch on" aria-label="启用资产有效期" aria-pressed="true"></button></div>
+            <div class="rule-row"><div><div class="name">资产数量不足</div><div class="rid">QUAL-COUNT-001 · SOFT</div></div><div class="spacer"></div><span class="badge b-amber">medium</span><button class="switch on" aria-label="启用资产数量" aria-pressed="true"></button></div>
+            <div class="rule-row"><div><div class="name">无源事实主张</div><div class="rid">EVID-UNSOURCED-001 · HARD</div></div><div class="spacer"></div><span class="badge b-rose">high</span><button class="switch on" aria-label="启用无源主张" aria-pressed="true"></button></div>
+            <div class="rule-row"><div><div class="name">章节内容为空</div><div class="rid">CONTENT-EMPTY-001 · SOFT</div></div><div class="spacer"></div><span class="badge b-slate">low</span><button class="switch on" aria-label="启用空章节" aria-pressed="true"></button></div>
+            <div class="rule-row"><div><div class="name">跨章节重复段落</div><div class="rid">SIMILARITY-DUP-001 · SOFT</div></div><div class="spacer"></div><span class="badge b-amber">medium</span><button class="switch on" aria-label="启用重复段落" aria-pressed="true"></button></div>
+            <div class="rule-row"><div><div class="name">投标报价高于预算</div><div class="rid">PRICE-OVER-BUDGET-001 · HARD</div></div><div class="spacer"></div><span class="badge b-rose">high</span><button class="switch on" aria-label="启用超预算" aria-pressed="true"></button></div>
+            <div class="rule-row"><div><div class="name">异常低价提示</div><div class="rid">PRICE-ABNORMAL-LOW-001 · SOFT</div></div><div class="spacer"></div><span class="badge b-amber">medium</span><button class="switch on" aria-label="启用异常低价" aria-pressed="true"></button></div>
+          </div>
+          <p class="note" style="margin-top:10px">演示展示 13 条，其余 11 条为清单/时间/项目信息/编号一致性等规则。停用规则会从扫描结果与摘要中排除；停用不删除历史 findings。</p>
+        </div>
+      </section>
+
+      <!-- 用户管理 -->
+      <section class="view" id="view-users" role="tabpanel" aria-label="用户管理">
+        <div class="page-head"><div><p class="eyebrow">TENANT USERS / RBAC</p><h1>用户管理</h1><p class="subtitle">租户管理员可创建用户、分配角色、停用账号；最后一个管理员与自停用/自降权受保护。</p></div><button class="btn">新增用户</button></div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>姓名</th><th>邮箱</th><th>角色</th><th>状态</th><th>最近登录</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr><td class="proj-name">演示用户</td><td class="mono">demo@example.com</td><td><span class="badge b-gold">企业管理员</span></td><td><span class="badge b-green">active</span></td><td>2026-10-22 10:48</td><td><span class="badge b-slate">当前账号</span></td></tr>
+                <tr><td class="proj-name">张工</td><td class="mono">zhang@example.com</td><td><span class="badge b-indigo">标书工程师</span></td><td><span class="badge b-green">active</span></td><td>2026-10-22 09:12</td><td><span class="badge b-blue">编辑</span></td></tr>
+                <tr><td class="proj-name">李工</td><td class="mono">li@example.com</td><td><span class="badge b-indigo">合规 / 法务</span></td><td><span class="badge b-slate">disabled</span></td><td>2026-10-20 17:03</td><td><span class="badge b-blue">编辑</span></td></tr>
+                <tr><td class="proj-name">王工</td><td class="mono">wang@example.com</td><td><span class="badge b-indigo">投标负责人</span></td><td><span class="badge b-green">active</span></td><td>2026-10-22 08:40</td><td><span class="badge b-blue">编辑</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note" style="margin-top:10px">演示数据。改密/停用/改角色会使旧 access/refresh token 失效；最后一名管理员不可停用或降权。</p>
+        </div>
+        <div class="two-col" style="margin-top:12px">
+          <div class="card"><p class="card-title">角色与权限 <span class="mono">ROLES</span></p><div class="kv"><span>企业管理员</span><b>tenant · 租户全部权限</b></div><div class="kv"><span>投标负责人</span><b>tenant · 机会 / 资产读 / 项目全流程</b></div><div class="kv"><span>标书工程师</span><b>tenant · 项目写 / 生成 / 核查</b></div><div class="kv"><span>合规 / 法务</span><b>tenant · 合规预检 / findings / 策略</b></div><div class="kv"><span>部门知识管理员</span><span class="badge b-blue">tenant + org_unit</span></div><div class="kv"><span>自定义角色</span><span class="badge b-indigo">不能超出创建者能力</span></div></div>
+          <div class="card"><p class="card-title">安全保护 <span class="mono">GUARDS</span></p><div class="kv"><span>自停用</span><span class="badge b-rose">422 拒绝</span></div><div class="kv"><span>自改角色</span><span class="badge b-rose">422 拒绝</span></div><div class="kv"><span>最后一名管理员</span><span class="badge b-rose">不可移除</span></div><div class="kv"><span>跨租户访问</span><span class="badge b-slate">404</span></div><div class="kv"><span>登出 / 改密 / 停用</span><span class="badge b-green">token 立即失效</span></div><div class="kv"><span>登录失败</span><span class="badge b-amber">账号 + IP 限流 429</span></div></div>
+        </div>
+      </section>
+
+      <!-- 权限治理（管理员页） -->
+      <section class="view admin-only" id="view-access" role="tabpanel" aria-label="权限治理">
+        <div class="page-head"><div><p class="eyebrow">ACCESS GOVERNANCE</p><h1>权限治理</h1><p class="subtitle">部门、作用域角色、资源 ACL、字段脱敏与个人资源调阅；所有变更由后端重新鉴权并写入审计链。</p></div><span class="badge b-rose">管理员页面</span></div>
+        <div class="grid kpis">
+          <div class="card"><div class="kpi-label">部门</div><div class="kpi-value">3</div><div class="kpi-hint">支持父子层级与部门经理</div></div>
+          <div class="card"><div class="kpi-label">自定义角色</div><div class="kpi-value">2</div><div class="kpi-hint">可限制 tenant / org_unit 作用域</div></div>
+          <div class="card"><div class="kpi-label">字段策略</div><div class="kpi-value">3</div><div class="kpi-hint">hide / mask / partial</div></div>
+          <div class="card"><div class="kpi-label">待审批调阅</div><div class="kpi-value">0</div><div class="kpi-hint">break-glass 限时只读</div></div>
+        </div>
+        <div class="two-col" style="margin-top:12px">
+          <div class="card">
+            <p class="card-title">部门与成员 <span class="mono">ORG UNITS</span></p>
+            <div class="kv"><span>投标一部</span><b>6 人 · 经理 张工</b></div>
+            <div class="kv"><span>投标二部</span><b>4 人 · 经理 王工</b></div>
+            <div class="kv"><span>解决方案部</span><b>3 人 · 直属企业</b></div>
+            <p class="note" style="margin-top:10px">部门成员默认只读本部门资产与知识库；部门经理可写。组织 ACL 支持「含子部门」继承，跨部门默认不可见。</p>
+          </div>
+          <div class="card">
+            <p class="card-title">角色与作用域 <span class="mono">SCOPED ROLES</span></p>
+            <div class="kv"><span>企业管理员</span><b>tenant · 租户全部权限</b></div>
+            <div class="kv"><span>部门知识管理员</span><b>tenant + org_unit · 知识读写 / ACL</b></div>
+            <div class="kv"><span>字段审计员</span><b>tenant · audit:read / 字段策略只读</b></div>
+            <p class="note" style="margin-top:10px">自定义角色不能包含平台权限，也不能授予超出创建者的能力；部门作用域角色可设置过期时间，到期自动失效。</p>
+          </div>
+        </div>
+        <div class="two-col" style="margin-top:12px">
+          <div class="card">
+            <p class="card-title">字段脱敏 <span class="mono">FIELD POLICIES</span></p>
+            <div class="kv"><span>qualifications.cert_no</span><span class="badge b-amber">≥ confidential · mask</span></div>
+            <div class="kv"><span>personnel.cert_no</span><span class="badge b-amber">≥ confidential · partial</span></div>
+            <div class="kv"><span>performances.amount</span><span class="badge b-rose">≥ restricted · hide</span></div>
+            <p class="note" style="margin-top:10px">策略在响应序列化前应用，列表、详情与导出使用同一套规则；低 clearance 用户看到掩码而不是原文。</p>
+          </div>
+          <div class="card">
+            <p class="card-title">个人资源与离职交接 <span class="mono">OFFBOARDING</span></p>
+            <div class="kv"><span>个人知识库</span><b>2 个 · 仅本人可读</b></div>
+            <div class="kv"><span>个人模板</span><b>1 个 · 仅本人可用</b></div>
+            <div class="kv"><span>账号停用</span><span class="badge b-amber">orphaned · 可转移</span></div>
+            <p class="note" style="margin-top:10px">管理员只看到元数据；调阅个人正文需 break-glass 申请与审批，审批人不能是申请人，授权限时且只读。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 账号设置 -->
+      <section class="view" id="view-settings" role="tabpanel" aria-label="账号设置">
+        <div class="page-head"><div><p class="eyebrow">ACCOUNT / MODEL</p><h1>账号设置</h1><p class="subtitle">账号信息、自助改密与租户级模型配置；密钥只来自环境变量/密钥管理，不在此展示或入库。</p></div><span class="badge b-gold">演示数据</span></div>
+        <div class="two-col">
+          <div class="card">
+            <p class="card-title">账号信息 <span class="mono">PROFILE</span></p>
+            <div class="kv"><span>姓名</span><b>演示用户</b></div>
+            <div class="kv"><span>邮箱</span><b class="mono">demo@example.com</b></div>
+            <div class="kv"><span>租户</span><b>演示投标企业</b></div>
+            <div class="kv"><span>角色</span><span class="badge b-gold">企业管理员</span></div>
+            <div class="kv"><span>会话</span><b>access + refresh（token_version）</b></div>
+            <p class="card-title" style="margin-top:18px">修改密码 <span class="mono">PASSWORD</span></p>
+            <div class="grid" style="grid-template-columns:1fr 1fr">
+              <label class="field">当前密码<input type="password" value="demo" disabled /></label>
+              <label class="field">新密码<input type="password" value="demo" disabled /></label>
+            </div>
+            <button class="btn" style="margin-top:10px" disabled>保存（演示禁用）</button>
+            <p class="note" style="margin-top:8px">演示站不提交表单。真实系统改密成功后旧会话立即失效。</p>
+          </div>
+          <div class="card">
+            <p class="card-title">AI 模型配置 <span class="mono">MODELS</span></p>
+            <div class="kv"><span>主模型</span><b class="mono">deepseek-flash</b></div>
+            <div class="kv"><span>判别 / 评标</span><b class="mono">Qwen3.5-4B-SemIf</b></div>
+            <div class="kv"><span>Base URL</span><b class="mono">https://api.deepseek.com/v1</b></div>
+            <div class="kv"><span>主模型启用</span><button class="switch on" aria-label="主模型启用" aria-pressed="true"></button></div>
+            <div class="kv"><span>judge 启用</span><button class="switch on" aria-label="judge 启用" aria-pressed="true"></button></div>
+            <div class="kv"><span>API Key</span><span class="badge b-slate">环境变量托管</span></div>
+            <div class="kv"><span>个人 Key（BYOK）</span><span class="badge b-green">AES-256-GCM · 只显示 last4</span></div>
+            <div class="kv"><span>企业数据策略</span><span class="badge b-amber">默认禁止个人 Key 处理</span></div>
+            <div class="kv"><span>地址安全</span><span class="badge b-blue">默认拒绝私网 / 回环</span></div>
+            <p class="note" style="margin-top:10px">租户可覆盖 base_url/model/enabled；个人 Key 只写不读、仅本人可用，企业数据是否允许走个人 Key 由租户策略控制。judge 超时会显式回退主模型并记录 judge_fallback。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 平台租户（管理员页） -->
+      <section class="view" id="view-tenants" role="tabpanel" aria-label="平台租户">
+        <div class="page-head"><div><p class="eyebrow">PLATFORM ADMIN / TENANTS</p><h1>平台租户</h1><p class="subtitle">平台管理员视角：租户生命周期、管理员分配与隔离边界；普通租户管理员不可见本页。</p></div><span class="badge b-rose">仅平台管理员</span></div>
+        <div class="banner" style="background:rgba(99,102,241,.07);border-color:rgba(99,102,241,.3);color:#3730a3">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:0 0 15px;margin-top:1px"><path d="M12 3l8 4v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V7l8-4z"/></svg>
+          <div><b>管理员页面。</b>本页展示平台级租户与系统健康；真实系统按权限控制，平台租户与业务租户数据严格隔离。</div>
+        </div>
+        <div class="grid kpis">
+          <div class="card"><div class="kpi-label">租户</div><div class="kpi-value">2</div><div class="kpi-hint">1 演示 + 1 示例</div></div>
+          <div class="card"><div class="kpi-label">用户</div><div class="kpi-value">4</div><div class="kpi-hint">跨租户合计</div></div>
+          <div class="card"><div class="kpi-label">业务表</div><div class="kpi-value">54</div><div class="kpi-hint">迁移 head 0041</div></div>
+          <div class="card"><div class="kpi-label">审计事件</div><div class="kpi-value">80</div><div class="kpi-hint">哈希链 valid</div></div>
+        </div>
+        <div class="two-col" style="margin-top:12px">
+          <div class="card">
+            <p class="card-title">租户列表 <span class="mono">TENANTS</span></p>
+            <div class="table-wrap">
+              <table style="min-width:0">
+                <thead><tr><th>租户</th><th>类型</th><th>用户</th><th>状态</th></tr></thead>
+                <tbody>
+                  <tr><td class="proj-name">演示投标企业</td><td><span class="badge b-indigo">customer</span></td><td>3</td><td><span class="badge b-green">active</span></td></tr>
+                  <tr><td class="proj-name">示例工程公司</td><td><span class="badge b-indigo">customer</span></td><td>1</td><td><span class="badge b-green">active</span></td></tr>
+                  <tr><td class="proj-name">BidCopilot Platform</td><td><span class="badge b-gold">platform</span></td><td>1</td><td><span class="badge b-green">active</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="note" style="margin-top:10px">演示数据。跨租户按 ID 读取返回 404，不泄露存在性。</p>
+          </div>
+          <div class="card">
+            <p class="card-title">管理员能力 <span class="mono">ADMIN</span></p>
+            <div class="kv"><span>创建租户 / 分配管理员</span><span class="badge b-green">可用</span></div>
+            <div class="kv"><span>租户用户与角色</span><span class="badge b-green">可用</span></div>
+            <div class="kv"><span>合规策略与模型配置</span><span class="badge b-green">按租户隔离</span></div>
+            <div class="kv"><span>审计链校验</span><span class="badge b-green">valid</span></div>
+            <div class="kv"><span>恢复 / 备份</span><span class="badge b-slate">运维脚本</span></div>
+            <p class="note" style="margin-top:10px">平台管理员不绕过租户隔离读取业务数据；敏感操作写入审计链。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 使用帮助 -->
+      <section class="view" id="view-help" role="tabpanel" aria-label="使用帮助">
+        <div class="page-head">
+          <div>
+            <p class="eyebrow">GUIDE / HANDBOOK</p>
+            <h1>使用帮助</h1>
+            <p class="subtitle">真实产品登录后从侧边栏「帮助 → 使用帮助」进入；页面按角色显示，内容按当前页面与后端校验维护。</p>
+          </div>
+          <span class="badge b-gold">静态摘要 · 20 章节</span>
+        </div>
+        <div class="banner">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:0 0 15px;margin-top:1px"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+          <div><b>这是一份产品内使用说明的静态摘要。</b>真实系统的 <span class="mono">/help</span> 还包含可点击目录、FAQ 折叠、权限/状态口径和快捷入口；菜单与按钮会随账号权限变化。</div>
+        </div>
+        <div class="grid" style="grid-template-columns:1.15fr 1fr;gap:12px">
+          <div class="card">
+            <p class="card-title">一条主线，九个动作 <span class="mono">QUICK START</span></p>
+            <div class="stage-list">
+              <div class="stage"><span class="stage-no">01</span><div><div class="stage-name">登录并确认权限</div><div class="stage-desc">侧边栏只显示当前角色可用的模块</div></div><span class="stage-state state-ok">入口</span></div>
+              <div class="stage"><span class="stage-no">02</span><div><div class="stage-name">机会转项目</div><div class="stage-desc">机会详情「转为投标项目」</div></div><span class="stage-state state-ok">立项</span></div>
+              <div class="stage"><span class="stage-no">03</span><div><div class="stage-name">上传招标文件</div><div class="stage-desc">招标 / 澄清 / 补遗 / 最终标书</div></div><span class="stage-state state-ok">解析</span></div>
+              <div class="stage"><span class="stage-no">04</span><div><div class="stage-name">矩阵与决策</div><div class="stage-desc">评分覆盖、资格预审、Bid-No-Bid</div></div><span class="stage-state state-ok">决策</span></div>
+              <div class="stage"><span class="stage-no">05</span><div><div class="stage-name">模板生成大纲</div><div class="stage-desc">结构模板 + 评分项响应章节</div></div><span class="stage-state state-ok">骨架</span></div>
+              <div class="stage"><span class="stage-no">06</span><div><div class="stage-name">章节生成核查</div><div class="stage-desc">规则/LLM 草稿 → 事实核查 → 审批</div></div><span class="stage-state state-warn">需确认</span></div>
+              <div class="stage"><span class="stage-no">07</span><div><div class="stage-name">响应与自查</div><div class="stage-desc">逐条响应、交标自查、有限自检</div></div><span class="stage-state state-warn">闸门</span></div>
+              <div class="stage"><span class="stage-no">08</span><div><div class="stage-name">合规预检导出</div><div class="stage-desc">处置 findings 后导出 docx/暗标</div></div><span class="stage-state state-warn">交付</span></div>
+              <div class="stage"><span class="stage-no">09</span><div><div class="stage-name">复盘与合同</div><div class="stage-desc">记录结果，中标后进合同台账</div></div><span class="stage-state state-ok">沉淀</span></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card">
+              <p class="card-title">20 个章节 <span class="mono">CONTENTS</span></p>
+              <div class="role-tags">
+                <span class="badge b-slate">快速开始</span><span class="badge b-slate">工作流总览</span><span class="badge b-slate">权限与角色</span><span class="badge b-slate">指挥台</span><span class="badge b-slate">机会中心</span><span class="badge b-slate">投标项目</span><span class="badge b-slate">合同台账</span><span class="badge b-slate">企业资产</span><span class="badge b-slate">企业知识库</span><span class="badge b-slate">模板与技能</span><span class="badge b-slate">数据运营</span><span class="badge b-slate">审计日志</span><span class="badge b-slate">合规策略</span><span class="badge b-slate">用户管理</span><span class="badge b-slate">权限治理</span><span class="badge b-slate">账号设置</span><span class="badge b-slate">平台租户</span><span class="badge b-slate">状态与标记</span><span class="badge b-slate">常见问题</span><span class="badge b-slate">安全与边界</span>
+              </div>
+              <p class="note" style="margin-top:10px">目录支持锚点直达；移动端在「本页目录」中折叠。帮助内容覆盖权限、状态机、导出闸门、合同审批流、知识库 ACL/召回边界等真实口径。</p>
+            </div>
+            <div class="card">
+              <p class="card-title">看到这些状态不要猜 <span class="mono">STATUS</span></p>
+              <div class="kv"><span>UNKNOWN</span><span class="badge b-amber">缺证据，需补资产或人工确认</span></div>
+              <div class="kv"><span>insufficient_data</span><span class="badge b-amber">缺输入，不拿默认值凑数</span></div>
+              <div class="kv"><span>未配置</span><span class="badge b-rose">缺 LLM / OCR / 数据源配置</span></div>
+              <div class="kv"><span>409 导出拦截</span><span class="badge b-blue">先处理未确认响应，或强制导出留审计</span></div>
+              <p class="note" style="margin-top:10px">编辑已审批章节会回到草稿并重置核查；导出只包含已审批章节。</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <span>BidCopilot · 静态演示站 · 界面与数据为示例，非实时系统</span>
+        <span class="ev">566 TESTS · 2 SKIPPED · 19 GOLD CORPORA · 29 RULES · 66 TABLES · HEAD 0056</span>
+      </footer>
+    </div>
+  </div>
+</div>
+
+<script>
+  const titles = {command:"指挥台",opps:"机会中心",projects:"投标项目",assets:"企业资产",knowledge:"企业知识库",templates:"模板与技能",compliance:"合规与评标",ops:"数据运营",audit:"审计日志",policies:"合规策略",users:"用户管理",access:"权限治理",settings:"账号设置",tenants:"平台租户",help:"使用帮助"};
+  const ADMIN_VIEWS = new Set(["ops","audit","policies","users","tenants"]);
+  const navButtons = Array.from(document.querySelectorAll(".nav-btn"));
+  const views = Array.from(document.querySelectorAll(".view"));
+  const roleButtons = Array.from(document.querySelectorAll(".role-switch button"));
+  const oppSourceButtons = Array.from(document.querySelectorAll("[data-opp-source]"));
+  const oppSources = {
+    data: document.getElementById("opp-source-data"),
+    web: document.getElementById("opp-source-web"),
+  };
+
+  function showOppSource(source){
+    oppSourceButtons.forEach(b=>{
+      const active = b.dataset.oppSource === source;
+      b.classList.toggle("active", active);
+      b.setAttribute("aria-selected", String(active));
+    });
+    Object.entries(oppSources).forEach(([key, el])=>{
+      if(el) el.hidden = key !== source;
+    });
+  }
+  const initialRole = new URLSearchParams(location.search).get("role");
+  let role = initialRole === "user" ? "user" : "admin";
+
+  function syncUrl(view){
+    const url = new URL(location.href);
+    url.searchParams.set("role", role);
+    history.replaceState(null, "", url.pathname + url.search + "#" + view);
+  }
+
+  function show(view){
+    if(role === "user" && ADMIN_VIEWS.has(view)) view = "command";
+    navButtons.forEach(b=>b.setAttribute("aria-selected", String(b.dataset.view===view)));
+    views.forEach(v=>v.classList.toggle("active", v.id==="view-"+view));
+    document.getElementById("crumb-title").textContent = titles[view] || "指挥台";
+    syncUrl(view);
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  function applyRole(next){
+    role = next;
+    document.body.dataset.role = role;
+    roleButtons.forEach(b=>b.setAttribute("aria-pressed", String(b.dataset.role===role)));
+    document.getElementById("side-role").textContent =
+      role === "admin" ? "演示投标企业 · 管理员" : "演示投标企业 · 平台用户";
+    const active = (document.querySelector(".view.active")?.id || "view-command").replace("view-","");
+    if(role === "user" && ADMIN_VIEWS.has(active)) show("command");
+    else syncUrl(active);
+  }
+
+  const initialView = (location.hash || "").replace("#", "");
+  roleButtons.forEach(b=>b.addEventListener("click",()=>applyRole(b.dataset.role)));
+  applyRole(role);
+  if(initialView === "research"){ show("opps"); showOppSource("web"); }
+  else if(titles[initialView]) show(initialView);
+  navButtons.forEach(b=>b.addEventListener("click",()=>{
+    show(b.dataset.view);
+    if(b.dataset.view === "opps") showOppSource("data");
+  }));
+  oppSourceButtons.forEach(b=>b.addEventListener("click",()=>showOppSource(b.dataset.oppSource)));
+  document.querySelectorAll("[data-goto]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.goto)));
+
+  const search = document.getElementById("proj-search");
+  if(search){search.addEventListener("input",()=>{
+    const q = search.value.trim().toLowerCase();
+    document.querySelectorAll("#proj-body tr").forEach(tr=>{
+      tr.style.display = (tr.dataset.text||"").toLowerCase().includes(q) ? "" : "none";
+    });
+  });}
+  document.querySelectorAll(".switch").forEach(sw=>sw.addEventListener("click",()=>{
+    const on = sw.classList.toggle("on");
+    sw.setAttribute("aria-pressed", String(on));
+  }));
+</script>
+</body>
+</html>

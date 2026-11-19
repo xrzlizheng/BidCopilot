@@ -1,0 +1,105 @@
+name: bidcopilot-external
+
+# 数据层分离部署（docs/adr/ADR-0001）：应用消费与单容器同一镜像
+# （bidcopilot:single，同一 Dockerfile 构建），PostgreSQL / Redis / MinIO
+# 作为独立服务，应用经 env 外置连接；镜像内服务不启动。
+#
+# 启动：docker compose -f deploy/external/docker-compose.yml up -d
+# 停止：docker compose -f deploy/external/docker-compose.yml down
+#
+# 该形态同时是 SaaS 数据层外置的证据形态：把下面的服务换成托管实例
+# （云 PostgreSQL / Redis / S3 兼容存储）即为 SaaS 的数据层用法。
+# 注意与 allin1 共用 18080 端口，同时只能运行一个；可用
+# BIDCOPILOT_WEB_PORT 改端口。
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${BIDCOPILOT_DB_USER:-bidcopilot}
+      POSTGRES_PASSWORD: ${BIDCOPILOT_DB_PASSWORD:-bidcopilot}
+      POSTGRES_DB: ${BIDCOPILOT_DB_NAME:-bidcopilot}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  minio:
+    # 注意：latest 未固定版本——交付发布前必须固定为已验证的稳定 tag
+    # （当前交付机无法访问 registry 核实最新稳定版，见交付报告「已知限制」）。
+    image: minio/minio:latest
+    command: ["server", "/data"]
+    environment:
+      MINIO_ROOT_USER: ${BIDCOPILOT_MINIO_USER:-bidcopilot}
+      MINIO_ROOT_PASSWORD: ${BIDCOPILOT_MINIO_PASSWORD:-bidcopilot-demo-secret}
+    volumes:
+      - miniodata:/data
+    restart: unless-stopped
+
+  bidcopilot:
+    build:
+      context: ../..
+      dockerfile: deploy/allin1/Dockerfile
+    image: bidcopilot:single
+    environment:
+      # 外置数据层开关：跳过镜像内 PostgreSQL/Redis/MinIO 自启；
+      # 演示种子数据默认不灌入（BIDCOPILOT_SEED_DEMO=1 可显式开启）。
+      BIDCOPILOT_EXTERNAL_SERVICES: "1"
+      APP_ENV: production
+      SCHEDULER_ENABLED: "true"
+      DATABASE_URL: postgresql+asyncpg://${BIDCOPILOT_DB_USER:-bidcopilot}:${BIDCOPILOT_DB_PASSWORD:-bidcopilot}@postgres:5432/${BIDCOPILOT_DB_NAME:-bidcopilot}
+      REDIS_URL: redis://redis:6379/0
+      SNAPSHOT_STORE: minio
+      MINIO_ENDPOINT: minio:9000
+      MINIO_BUCKET: ${BIDCOPILOT_MINIO_BUCKET:-bidcopilot}
+      MINIO_SECURE: "false"
+      MINIO_ACCESS_KEY: ${BIDCOPILOT_MINIO_USER:-bidcopilot}
+      MINIO_SECRET_KEY: ${BIDCOPILOT_MINIO_PASSWORD:-bidcopilot-demo-secret}
+      KEEPRISK_MCP_ENABLED: ${KEEPRISK_MCP_ENABLED:-false}
+      KEEPRISK_MCP_URL: ${KEEPRISK_MCP_URL:-https://mcp.keeprisk.com/mcp}
+      KEEPRISK_MCP_TOKEN: ${KEEPRISK_MCP_TOKEN:-}
+      KEEPRISK_MCP_TIMEOUT_SECONDS: ${KEEPRISK_MCP_TIMEOUT_SECONDS:-30}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-true}
+      WEBHOOK_DELIVERY_ENABLED: ${WEBHOOK_DELIVERY_ENABLED:-true}
+      WEBHOOK_TIMEOUT_SECONDS: ${WEBHOOK_TIMEOUT_SECONDS:-10}
+      WEBHOOK_MAX_ATTEMPTS: ${WEBHOOK_MAX_ATTEMPTS:-3}
+      WEBHOOK_RETRY_BACKOFF_SECONDS: ${WEBHOOK_RETRY_BACKOFF_SECONDS:-0.5}
+      WEBHOOK_ALLOWED_HOSTS: ${WEBHOOK_ALLOWED_HOSTS:-}
+      WEBHOOK_ALLOW_PRIVATE_URL: ${WEBHOOK_ALLOW_PRIVATE_URL:-false}
+    ports:
+      - "127.0.0.1:${BIDCOPILOT_WEB_PORT:-18080}:80"
+    volumes:
+      # 仅存 JWT 密钥（未显式提供时生成）与日志；业务数据在外部服务。
+      - appdata:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  miniodata:
+  appdata:

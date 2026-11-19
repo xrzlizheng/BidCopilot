@@ -1,0 +1,19 @@
+{
+  "contract_type": "service",
+  "note": "核心条款缺失：付款比例/违约金上限/知识产权/保密/争议解决 全部缺失",
+  "expect_violations": [
+    "payment_terms_missing",
+    "penalty_cap_missing",
+    "ip_missing",
+    "confidentiality_missing",
+    "dispute_missing"
+  ],
+  "expect_absent": [
+    "performance_deposit_over_10pct",
+    "deposit_refund_missing",
+    "back_to_back_payment",
+    "acceptance_vague",
+    "warranty_missing",
+    "placeholder_blank_fields"
+  ]
+}

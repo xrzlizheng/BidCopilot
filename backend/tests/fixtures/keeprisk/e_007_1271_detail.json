@@ -1,0 +1,98 @@
+{
+  "code": "100",
+  "orderNo": "<redacted>",
+  "charge": true,
+  "data": {
+    "total": 2,
+    "pageNo": 1,
+    "pageSize": 2,
+    "list": [
+      {
+        "city": "",
+        "bidEntInfos": "盘锦市大洼区数据中心(盘锦市大洼区政务服务中心)",
+        "winBidAmount": "1298520.0000",
+        "county": "",
+        "publishDate": "2026-10-20 23:59:52",
+        "industry": [
+          "服务采购"
+        ],
+        "agentEntInfos": "",
+        "title": "盘锦市大洼区智慧城市平台专网服务项目合同",
+        "content": "<div style=\"text-indent: 24pt; line-height: 28pt;margin:10px;\">\n <h1 align=\"center\" style=\"margin:0cm;margin-bottom:.0001pt;text-align:center;line-height:150%;mso-layout-grid-align:none;text-autospace:none\">\n  合同公告\n </h1>\n <h1 align=\"center\" style=\"margin:0cm;margin-bottom:.0001pt;text-align:center;line-height:150%;mso-layout-grid-align:none;text-autospace:none\">\n  <span lang=\"EN-US\" style=\"font-size:14.0pt\">\n  </span>\n </h1>\n <p>\n  <span style=\"font-size:14.0pt;font-family:黑体\">\n   一、合同编号：\n  </span>\n  <span style=\"font-size:14.0pt;font-family:仿宋\">\n   JH26-211121-00061-001-001\n  </span>\n  <span lang=\"EN-US\" style=\"font-size:14.0pt;font-family:黑体\">\n  </span>\n </p>\n <p>\n  <span style=\"font-size:14.0pt;font-family:黑体\">\n   二、合同名称：\n  </span>\n  <span style=\"font-size:14.0pt;font-family:仿宋\">\n   盘锦市大洼区智慧城市平台专网服务项目合同\n  </span>\n  <span lang=\"EN-US\" style=\"font-size:14.0pt;font-family:黑体\">\n  </span>\n </p>\n <p>\n  <span style=\"font-size:14.0pt;font-family:黑体\">\n   三、项目编号（\n   <i style=\"mso-bidi-font-style:normal\">\n    或政府采购计划编号、采购计划备案文号等，如有\n   </i>\n   ）：\n  </span>\n  <span style=\"font-size:14.0pt;font-family:仿宋\">\n   JH26-211121-00061\n  </span>\n  <span lang=\"EN-US\" style=\"font-size:14.0pt;font-family:黑体\">\n  </span>\n </p>\n <p>\n  <span style=\"font-size:14.0pt;font-family:黑体\">\n   四、项目名称：\n  </span>\n  <span style=\"font-size:14.0pt;font-family:仿宋\">\n   盘锦市大洼区智慧城市平台专网服务项目\n  </span>\n  <span lang=\"EN-US\" style=\"font-size:14.0pt;font-family:黑体\">\n  </span>\n </p>\n <p>\n  <span style=\"font-size:14.0pt;font-family:黑体\">\n   五、合同主体\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p style=\"text-indent:28.0pt;\">\n  <span style=\"font-size:14.0pt;font-family:仿宋;padding-left:2em;\">\n   采购人（甲方）：盘锦市大洼区数据中心（盘锦市大洼区政务服务中心）\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p style=\"text-indent:28.0pt;\">\n  <span style=\"font-size:14.0pt;font-family:仿宋;padding-left:2em;\">\n   地\n   <span lang=\"EN-US\">\n    <span style=\"mso-spacerun:yes\">\n    </span>\n   </span>\n   址：大洼区大洼镇向海街道红海滩大街60号\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p style=\"text-indent:28.0pt;\">\n  <span style=\"font-size:14.0pt;font-family:仿宋;padding-left:2em;\">\n   联系方式：353****1655\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p style=\"text-indent:28.0pt;\">\n  <span style=\"font-size:14.0pt;font-family:仿宋;padding-left:2em;\">\n   供应商（乙方）：中国移动通信集团辽宁有限公司盘锦分公司\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p style=\"text-indent:28.0pt;\">\n  <span style=\"font-size:14.0pt;font-family:仿宋;padding-left:2em;\">\n   地\n   <span lang=\"EN-US\">\n    <span style=\"mso-spacerun:yes\">\n    </span>\n   </span>\n   址：盘锦市兴隆台区泰山路113号\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p style=\"text-indent:28.0pt;\">\n  <span style=\"font-size:14.0pt;font-family:仿宋;padding-left:2em;\">\n   联系方式：159****3688\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p>\n  <span style=\"font-size:14.0pt;font-family:黑体\">\n   六、合同主要信息\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p style=\"text-indent:28.0pt;\">\n  <span style=\"font-size:14.0pt;font-family:仿宋;padding-left:2em;\">\n   主要标的名称：盘锦市大洼区智慧城市平台专网服务项目\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p style=\"text-indent:28.0pt;\">\n  <span style=\"font-size:14.0pt;font-family:仿宋;padding-left:2em;\">\n   规格型号（或服务要求）：一、网络服务\n1、提供大洼区直部门、经济区、镇（街道）、村（社区）、分场与盘锦市及大洼区智慧城市专网接入服务。提供的服务需保证实现智慧城市平台的正常使用。\n2、提供的专用网络为：≥10M数据专线200条、≥100M数据专线21条、≥100M互联网专线1条、≥1G数据专线1条（详见附件）。合同期内若新增区直单位办公地点或办公地点发生变化，服务方需提供相应服务。\n3、需将区直部门、经济区、镇（街道）、村（社区）、分场划分为独立VLAN，VLAN内按实际需求设定IP地址段，设置DHCP。各VLAN间可互访，但IP地址不能互为使用。\n4、在合同签订后应在7个自然日内完成线路建设并投入使用。\n二、运维服务\n1、在服务期内提供全区智慧专网网络及网络汇聚节点运维服务，同时按需提供上门技术支撑、检修、迁移、点位调整及配套技术保障服务，确保网络系统持续安全、稳定、高效运行。拟投入本项目的服务团队人员具备互联网技术或传输与接入或通信信息等相关专业的初级及以上职称的15人。\n2、故障响应：供应商需提供7×24小时热线服务，在接到使用方电话或书面的检修通知后，相关技术人员应12小时内到达故障现场。\n3、故障修复：一般故障24小时内修复，如不能及时修复故障，将视具体情况，核减供应商相应的网络服务费用。\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p style=\"text-indent:28.0pt;\">\n  <span style=\"font-size:14.0pt;font-family:仿宋;padding-left:2em;\">\n   主要标的数量：1\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p style=\"text-indent:28.0pt;\">\n  <span style=\"font-size:14.0pt;font-family:仿宋;padding-left:2em;\">\n   主要标的单价：1,298,520.00元\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p style=\"text-indent:28.0pt;\">\n  <span style=\"font-size:14.0pt;font-family:仿宋;padding-left:2em;\">\n   合同金额：1,298,520.00元\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p style=\"text-indent:28.0pt;\">\n  <span style=\"font-size:14.0pt;font-family:仿宋;padding-left:2em;\">\n   履约期限、地点等简要信息：\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p style=\"text-indent:28.0pt;\">\n  <span style=\"font-size:14.0pt;font-family:仿宋;padding-left:2em;\">\n   采购方式：\n   <i>\n    公开招标\n   </i>\n   <span lang=\"EN-US\">\n   </span>\n  </span>\n </p>\n <p>\n  <span style=\"font-size:14.0pt;font-family:黑体\">\n   七、合同签订日期：\n  </span>\n  <span style=\"font-size:14.0pt;font-family:仿宋\">\n   2026-10-20\n  </span>\n  <span lang=\"EN-US\" style=\"font-size:14.0pt;font-family:黑体\">\n  </span>\n </p>\n <p>\n  <span style=\"font-size:14.0pt;font-family:黑体\">\n   八、合同公告日期：\n  </span>\n  <span style=\"font-size:14.0pt;font-family:仿宋\">\n   2026-10-20\n  </span>\n  <span lang=\"EN-US\" style=\"font-size:14.0pt;font-family:黑体\">\n  </span>\n </p>\n <p>\n  <span style=\"font-size:14.0pt;font-family:黑体\">\n   九、其他补充事宜：\n  </span>\n  <span style=\"font-size:14.0pt;font-family:仿宋\">\n  </span>\n  <span lang=\"EN-US\" style=\"font-size:14.0pt;font-family:黑体\">\n  </span>\n </p>\n</div>\n",
+        "tenderEntNameInfos": "",
+        "sourceUrl": "http://www.ccgp-liaoning.gov.cn/portalDetails?contractId=-121294121a1428bd15d-4fb3&infoTypeCode=1901",
+        "involvingEntName": "",
+        "uid": "b53253f09be64654df4ccc3d33d1888f",
+        "tenderEidInfos": [],
+        "infoType": "3",
+        "projectNo": "",
+        "province": "",
+        "entRole": null,
+        "maxWinBidAmount": 1298520.0,
+        "keyword": "",
+        "bidEidInfos": [
+          "42f40c8b348961e9bab2219f4162072a"
+        ],
+        "tenderingMethod": "其他",
+        "agentEidInfos": [],
+        "noticeTypeSub": "其他",
+        "winEidInfos": "中国移动通信集团辽宁有限公司盘锦分公司",
+        "budgetAmount": "",
+        "maxBudgetAmount": null,
+        "bidEntType": [
+          "0"
+        ],
+        "businessType": "",
+        "projectName": "",
+        "winBidEidInfos": [
+          "0167b72f8d34842c35d200485c2feb98"
+        ]
+      },
+      {
+        "city": "南充市",
+        "bidEntInfos": "四川德憬交通建设投资有限公司",
+        "winBidAmount": "",
+        "county": "仪陇县",
+        "publishDate": "2026-10-16 00:00:00",
+        "industry": [
+          "弱电安防"
+        ],
+        "agentEntInfos": "景恒(四川)建设项目管理有限公司",
+        "title": "【企业采购】仪陇县2025年城镇老旧小区改造项目（安防）工程采购公告",
+        "content": "<div><div><div><div>     【企业采购】仪陇县2025年城镇老旧小区改造项目（安防）工程 采购公告    </div><p> <span>【发布时间 ：2026-10-16】</span> <span>【阅读次数：</span>】 </p><div><span>仪陇县</span><span>2025年城镇老旧小区改造项目（安防）工程 采购公告</span></div><p><span>景恒</span><span>(四川)建设项目管理有限公司 受 四川德憬交通建设投资有限公司 委托，拟对 仪陇县2025年城镇老旧小区改造项目（安防）工程 采用 竞争性磋商 方式进行采购，特邀请符合本次采购要求的供应商参加采购。</span></p><div><span>一、项目基本情况</span></div><p><span>1.项目名称： 仪陇县2025年城镇老旧小区改造项目（安防）工程</span></p><p><span>2.项目编号： DX2026000282</span></p><div><span>二、采购内容</span></div><p><span>详见采购文件。</span></p><div><span>三、资金来源、采购预算</span></div><p><span>1.资金来源： 上级补助和地方财政配套资金、争取上级补助 ；</span></p><p><span>2.采购预算： 元。</span></p><div><span>四、供应商参加本次采购活动应具备下列条件</span></div><p><span>1.具有独立承担民事责任的能力；</span></p><p><span>2.具有良好的商业信誉和健全的财务会计制度；</span></p><p><span>3.具有履行合同所必需的设备和专业技术能力；</span></p><p><span>4.有依法缴纳税收和社会保障资金的良好记录；</span></p><p><span>5.参加本次采购活动前三年内，在经营活动中没有重大违法记录；</span></p><p><span>6.落实政府采购政策需满足的资格要求： 本项目专门面向小微企业采购 ；</span></p><p><span>7.本项目的特定资格要求： 1. 供应商应具有电子与智能化工程专业承包二级或以上资质。 提供证书复印件</span><span>2. 具有有效期内的安全生产许可证。 提供证书复印件</span><span>3. 项目负责人应具有机电专业注册建造师二级或以上资格及安全生产考核合格B证。 提供证书复印件；</span></p><div><span>五、采购文件获取时间、地点</span></div><p><span>1.采购文件获取起止时间： 2026年10月17日 00时00分至2026年10月23日 23时59分 （北京时间）。</span></p><p><span>2.途径：通过德信阳光招采服务平台电子化交易系统-项目列表选择本项目获取采购文件。</span></p><p><span>3.采购代理机构不提供获取采购文件的其他方式。</span></p><div><span>六、提交响应文件截止时间、开启时间和地点</span></div><p><span>截止时间：</span> <span>2026年10月28日 15时00分 （北京时间）</span></p><p><span>提交响应文件地点：通过德信阳光招采服务平台电子化交易系统</span><span>-项目列表在线提交响应文件。</span></p><p><span>开启地点：通过德信阳光招采服务平台电子化交易系统</span><span>-项目列表大厅参与开启。</span></p><div><span>七、电子化采购相关事项</span></div><p><span>本项目实行电子化采购，使用的电子化交易系统为：德信阳光招采服务平台交易系统（以下简称</span><span>“交易系统”），登录地址：德信阳光招采服务平台（以下简称“交易平台”）（https://gsdxygzc.com）首页供应商用户登录入口。供应商应当按照以下要求，参与本次电子化采购活动。</span></p><p><span>1.供应商应当在交易平台-办事指南查看操作规范，并严格按照操作规范要求进行系统操作。供应商参与本项目电子化采购活动的范围主要包括：获取采购文件，编制、签章、加密并提交响应文件，参加开启、解密响应文件和电子评审等。</span></p><p><span>2.供应商应当使用交易平台办理的数字证书和电子印章，参加本项目电子化采购活动；已按规定办理数字证书和电子印章的供应商，按照交易平台操作规范进行身份信息绑定、权限设置和系统操作。未办理数字证书和电子印章的供应商，可致电交易平台联系电话查询办理。</span></p><p><span>供应商使用数字证书登录交易平台进行的一切系统操作和加盖电子印章确认的电子文书资料，均属于供应商真实意思表示，供应商对其系统操作行为和电子印章确认事项承担法律责任。</span></p><p><span>供应商应当加强数字证书和电子印章的日常校验和保管，确保在参加采购活动期间能够正常使用，严格授权管理，防止非授权操作。</span></p><p><span>3.供应商应当自行准备电子化采购所需的计算机终端、软硬件及网络环境，承担因准备不足产生的不利后果。</span></p><p><span>4.平台注册审核电话：0817-6989010，CA办理咨询QQ/电话：400-666-3999，技术支持：0817-6989655/0817-6989677。</span></p><div><span>八、其他补充事宜</span></div><p><span>/</span></p><div><span>九、联系方式</span></div><p><span>1.采购人信息</span></p><p><span>名</span> <span>称：</span> <span>四川德憬交通建设投资有限公司</span> </p><p><span>地</span> <span>址：</span> <span>四川省南充市仪陇县新政镇锦绣路一段</span><span>2,4,14,16,2-1号</span></p><p><span>联系人：</span> <span>黎先生</span> </p><p><span>联系方式：</span> <span>17760496318 </span></p><p><span>2.采购代理机构信息</span></p><p><span>名</span> <span>称：</span> <span>景恒</span><span>(四川)建设项目管理有限公司</span></p><p><span>地</span> <span>址：</span> <span>南充市嘉陵区滨河路</span><span>61号（辰朋咨询）二楼</span></p><p><span>联系人：</span> <span>周女士</span></p><p><span>联系方式：</span> <span>0817-3973073 </span></p></div><div><p> <a filelink=\"dd7b869471abd953a7b8884889415818\" href=\"https://www.scncggzy.com.cn//EpointWebBuilder/pages/webbuildermis/attach/downloadztbattach?attachGuid=9bef361e-5760-4253-bc5c-c872c674a993&amp;appUrlFlag=ztb001&amp;siteGuid=6c9256b0-e6df-41ac-bb8a-ae8f4a709cec&amp;cli_id=14\" rel=\"noreferrer\" title=\"安防采购公告.doc\">安防采购公告.doc</a> </p></div><input type=\"hidden\" value=\"e7bb6acd-1e49-4c2c-ad96-721ed4ae89f9\"/></div></div><div class=\"richTextFetch\" style=\"display:none;\"><div filemd5=\"dd7b869471abd953a7b8884889415818\"><div>¤2025ϾСĿɹʱ䣺20261016(Ĵ)Ŀ޹˾Ĵ㽽ͨͶ޹˾ίУ¤2025ϾСĿԴʽвɹϱβɹҪĹӦ̲μӲɹһĿ1.Ŀƣ¤2025ϾСĿ2.ĿţDX2026000282ɹɹļʽԴɹԤ1.ʽԴϼ͵طʽȡϼ2.ɹԤ㣺ԪġӦ̲μӱβɹӦ߱1.жеε2.õҵͽȫĲƶȣ3.кͬ豸רҵ4.˰պᱣʽü¼5.μӱβɹǰڣھӪûشΥ¼6.ʵɹʸҪĿרС΢ҵɹ7.ĿضʸҪ1.ӦӦеܻרҵаʡṩ֤鸴ӡ2.Чڵİȫ֤ṩ֤鸴ӡ3.ĿӦлרҵעὨʦʸȫ˺ϸB֤ṩ֤鸴ӡ塢ɹļȡʱ䡢ص1.ɹļȡֹʱ䣺2026101700ʱ002026102323ʱ59ʱ䣩2.;ͨвɷƽ̨ӻϵͳ-ĿбѡĿȡɹļ3.ɹṩȡɹļʽύӦļֹʱ䡢ʱ͵صֹʱ䣺2026102815ʱ00ʱ䣩ύӦļص㣺ͨвɷƽ̨ӻϵͳ-ĿбύӦļص㣺ͨвɷƽ̨ӻϵͳ-Ŀб뿪ߡӻɹĿʵеӻɹʹõĵӻϵͳΪвɷƽ̨ϵͳ¼ϵͳ¼ַвɷƽ̨¼ơƽ̨https://gsdxygzc.comҳӦû¼ڡӦӦҪ뱾εӻɹ1.ӦӦڽƽ̨-ָϲ鿴淶ϸղ淶ҪϵͳӦ̲뱾ĿӻɹķΧҪȡɹļơǩ¡ܲύӦļμӿӦļ͵ȡ2.ӦӦʹýƽ̨֤͵ӡ£μӱĿӻɹѰ涨֤͵ӡµĹӦ̣սƽ̨淶ϢȨúϵͳδ֤͵ӡµĹӦ̣µ罻ƽ̨ϵ绰ѯӦʹ֤¼ƽ̨еһϵͳͼӸǵӡȷϵĵϣڹӦʵ˼ʾӦ̶ϵͳΪ͵ӡȷеΡӦӦǿ֤͵ӡµճУͱܣȷڲμӲɹڼܹʹãϸȨֹȨ3.ӦӦ׼ӻɹļնˡӲ绷е׼Ĳ4.ƽ̨ע˵绰0817-6989010CAѯQQ/绰400-666-3999֧֣0817-6989655/0817-6989677ˡ/šϵʽ1.ɹϢƣĴ㽽ͨͶ޹˾ַĴʡϳ¤·һ2,4,14,16,2-1ϵˣϵʽ177604963182.ɹϢƣ(Ĵ)Ŀ޹˾ַϳм·61ţѯ¥ϵˣŮʿϵʽ0817-3973073</div></div></div>",
+        "tenderEntNameInfos": "",
+        "sourceUrl": "https://www.scncggzy.com.cn/yilong//jygk/001005/001005001/20261016/e7bb6acd-1e49-4c2c-ad96-721ed4ae89f9.html?cid=14",
+        "involvingEntName": "",
+        "uid": "526498d2fcc11acb5c80781a3128256a",
+        "tenderEidInfos": [],
+        "infoType": "1",
+        "projectNo": "DX2026000282",
+        "province": "四川",
+        "entRole": null,
+        "maxWinBidAmount": null,
+        "keyword": "",
+        "bidEidInfos": [
+          "0e79e5febbea493203117cd709872e21"
+        ],
+        "tenderingMethod": "公开招标",
+        "agentEidInfos": [
+          "e1abb7212d54412ce4a44bd076541ec0"
+        ],
+        "noticeTypeSub": "招标",
+        "winEidInfos": "",
+        "budgetAmount": "",
+        "maxBudgetAmount": null,
+        "bidEntType": [
+          "0"
+        ],
+        "businessType": "",
+        "projectName": "仪陇县2025年城镇老旧小区改造项目（安防）工程",
+        "winBidEidInfos": []
+      }
+    ]
+  },
+  "pcode": "E_007_1271",
+  "param": null,
+  "time": "1792557249268",
+  "message": "查询成功"
+}

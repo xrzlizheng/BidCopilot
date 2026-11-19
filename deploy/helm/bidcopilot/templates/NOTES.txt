@@ -1,0 +1,21 @@
+BidCopilot 已安装到命名空间 {{ .Release.Namespace }}。
+
+{{- if .Values.ingress.enabled }}
+访问地址：http{{ if .Values.ingress.tls }}s{{ end }}://{{ .Values.ingress.host }}
+{{- else }}
+Ingress 未启用。集群内访问：
+  kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "bidcopilot.fullname" . }} 18080:{{ .Values.bidcopilot.port }}
+  然后打开 http://127.0.0.1:18080
+{{- end }}
+
+前置条件：
+- 外部 PostgreSQL / Redis / MinIO 已就绪且网络可达（values.redis.url / values.minio.endpoint；
+  含口令的 DATABASE_URL 写入 Secret）。
+- 迁移 Job（pre-install/pre-upgrade hook）先于 Deployment 执行 alembic upgrade head；
+  升级前请先完成数据库备份。
+- 镜像内不启动 PostgreSQL/Redis/MinIO（BIDCOPILOT_EXTERNAL_SERVICES=true），
+  也不灌演示种子数据；确需演示账号时设置 BIDCOPILOT_SEED_DEMO=1。
+- 调度器多实例互斥由 PostgreSQL advisory lock 保证，副本可安全大于 1。
+
+冒烟状态：本 chart 的 helm lint/template 与首次 install 冒烟尚未在执行环境跑过
+（开发环境无 helm 与 K8s）；投产前请按 docs/adr/ADR-0001 的验证要求补齐并记录输出。

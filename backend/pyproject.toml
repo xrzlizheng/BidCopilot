@@ -1,0 +1,98 @@
+[project]
+name = "bidcopilot-backend"
+version = "0.1.0"
+description = "BidCopilot backend"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "alembic>=1.14,<2.0",
+  "asyncpg>=0.30,<1.0",
+  "email-validator>=2.2,<3.0",
+  "fastapi>=0.115,<1.0",
+  "httpx>=0.27,<1.0",
+  "minio>=7,<9",
+  "nh3>=0.2,<1.0",
+  "openpyxl>=3.1,<4.0",
+  "pillow>=11.0,<14.0",
+  "pypdf>=5.1,<6.0",
+  "python-docx>=1.1,<2.0",
+  "reportlab>=4.2,<5.0",
+  "pydantic>=2.9,<3.0",
+  "pydantic-settings>=2.6,<3.0",
+  "pwdlib[argon2]>=0.2,<1.0",
+  "pyjwt>=2.9,<3.0",
+  "python-multipart>=0.0.17,<1.0",
+  "redis>=5.2,<6.0",
+  "sqlalchemy[asyncio]>=2.0.36,<2.1",
+  "structlog>=24.4,<26.0",
+  "uvicorn[standard]>=0.32,<1.0",
+  "pypdfium2>=5.10.1,<6.0",
+  "python-pptx>=1.0.2",
+  "apscheduler>=3.11.3",
+  "pdfplumber>=0.11,<1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "fakeredis>=2.26,<3.0",
+  "mypy>=1.13,<2.0",
+  "pip-licenses>=5.0,<6.0",
+  "pytest>=8.3,<9.0",
+  "pytest-asyncio>=0.24,<1.0",
+  "pytest-cov>=6.0,<7.0",
+  "respx>=0.22,<1.0",
+  "ruff>=0.8,<1.0",
+]
+# 本地 OCR（MinerU 4，basic 档 = ONNX 小模型，纯 CPU；torch 仅是元数据硬依赖，
+# 经 [tool.uv.sources] 钉为 CPU 轮子）。镜像内必装；宿主机开发可缺省，
+# 缺省时 OCR_PROVIDER=auto 自动回落 MiniMax 云端或「OCR 服务未配置」。
+# 4.x 不使用 3.x 的 extras。
+ocr-local = [
+  "mineru>=4.0,<5",
+  # uv 的 sources 只对直接依赖生效：显式声明 torch 系才能把它们钉到 CPU 轮子源，
+  # 否则 mineru 传递引入的 torch 会走 PyPI 默认的 CUDA 轮子（数 GB）。
+  "torch>=2.6,<3",
+  "torchvision>=0.21,<1",
+]
+
+[tool.uv]
+package = false
+
+# mineru 4.x 基础包硬依赖 torch/torchvision（basic 档运行时走 ONNX 不需要 CUDA）。
+# 默认 PyPI Linux 轮子捆绑 CUDA（数 GB nvidia 依赖），这里把 torch 系钉到
+# 官方 CPU 轮子源，镜像体量与 CPU 推理场景匹配。
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+torchvision = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+pythonpath = ["."]
+markers = [
+  "integration: requires a real PostgreSQL database",
+  "gateway_live: calls the real KeepRisk gateway; requires GATEWAY_LIVE=1",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["."]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["B008", "E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+warn_unused_ignores = true

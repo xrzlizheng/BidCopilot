@@ -1,0 +1,88 @@
+digraph BidCopilot {
+  graph [
+    rankdir=TB,
+    fontname="Microsoft YaHei",
+    fontsize=12,
+    labelloc=t,
+    label="BidCopilot 容器与外部依赖（当前态 2026-10-30）\n实线 = 运行时调用或数据访问；虚线 = 条件/可选路径",
+    bgcolor="white",
+    pad=0.35,
+    nodesep=0.45,
+    ranksep=0.85,
+    compound=true
+  ];
+
+  node [
+    fontname="Microsoft YaHei",
+    fontsize=11,
+    shape=box,
+    style="rounded,filled",
+    fillcolor="#ffffff",
+    color="#5b6b7c",
+    penwidth=1.2,
+    margin="0.14,0.08"
+  ];
+
+  edge [
+    fontname="Microsoft YaHei",
+    fontsize=9,
+    color="#6b7a8c",
+    arrowsize=0.7
+  ];
+
+  subgraph cluster_users {
+    label="使用者（角色定义见 identity/roles.py）";
+    style="rounded,dashed";
+    color="#b8c2cc";
+    fontcolor="#4a5568";
+
+    u_platform [label="平台管理员\nplatform_admin", fillcolor="#e8eef7"];
+    u_admin [label="企业管理员\ntenant_admin", fillcolor="#e8eef7"];
+    u_team [label="投标团队\n投标负责人 / 标书工程师 / 合规法务", fillcolor="#e8eef7"];
+  }
+
+  subgraph cluster_system {
+    label="BidCopilot 系统边界（逻辑容器；allin1 形态下 nginx/Web/API 同处一个镜像）";
+    style="rounded";
+    color="#2f6fb3";
+    penwidth=1.4;
+    fontcolor="#1f4e79";
+
+    nginx [label="nginx 反向代理\n:80 同源入口\n/api、/healthz → API；/ → Web"];
+    web [label="Web 工作台\nNext.js 14.2.21 / Node 22\n浏览器端 fetch + TanStack Query"];
+    api [label="API 服务\nFastAPI 模块化单体\n社区版 30 个 router\nJWT + RBAC + TenantRepository\n进程内 APScheduler（8 个 job）"];
+    db [label="PostgreSQL 16\n业务库 · 76 个迁移（head 0077，社区版链）\nadvisory lock", shape=cylinder, fillcolor="#dbe7f3"];
+    redis [label="Redis 7\n登录限流 + /readyz + refresh 重放防护\n非缓存/队列", shape=cylinder, fillcolor="#dbe7f3"];
+    storage [label="对象存储\nMinIO 或本地目录\n快照 / 知识文件 / 图片", shape=folder, fillcolor="#eef2d9"];
+  }
+
+  subgraph cluster_external {
+    label="外部系统";
+    style="rounded,dashed";
+    color="#b0a58a";
+    fontcolor="#6b5d3e";
+
+    keeprisk [label="KeepRisk 标讯网关\n商机 / 企业标讯 / 历史中标", fillcolor="#f4efe3"];
+    krmcp [label="KeepRisk 企业数据 MCP\n工商 / 信用 / 股权 / 尽调", fillcolor="#f4efe3"];
+    llm [label="LLM / Judge 网关\nOpenAI 兼容 /chat/completions", fillcolor="#f4efe3"];
+    minimax [label="MiniMax VLM OCR\n云端视觉 OCR", fillcolor="#f4efe3"];
+    search [label="联网搜索 API\nDeepSeek 或 MiniMax", fillcolor="#f4efe3"];
+  }
+
+  u_platform -> nginx [label="HTTPS"];
+  u_admin -> nginx [label="HTTPS"];
+  u_team -> nginx [label="HTTPS"];
+
+  nginx -> web [label="页面与静态资源 :3000"];
+  nginx -> api [label="/api、/healthz :8000"];
+  web -> api [label="无 nginx 形态 /api rewrite", style=dashed];
+
+  api -> db [label="SQL（TenantRepository）"];
+  api -> redis [label="限流 / 探活"];
+  api -> storage [label="S3 API / 本地 FS"];
+  api -> keeprisk [label="HTTPS（含调度器订阅同步）"];
+  api -> krmcp [label="MCP 企业情报（按次计费）"];
+  api -> llm [label="HTTPS"];
+  api -> minimax [label="HTTPS 云端 OCR（可选）", style=dashed];
+  api -> search [label="HTTPS 联网检索（可选）", style=dashed];
+}
