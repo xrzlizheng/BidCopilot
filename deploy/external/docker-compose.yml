@@ -39,9 +39,15 @@ services:
     restart: unless-stopped
 
   minio:
-    # 注意：latest 未固定版本——交付发布前必须固定为已验证的稳定 tag
-    # （当前交付机无法访问 registry 核实最新稳定版，见交付报告「已知限制」）。
-    image: minio/minio:latest
+    # 上游 MinIO 社区版已 EOL：官方镜像 2026-09-11 从 Docker Hub 下架
+    # （quay.io 转需鉴权、dl.min.io 410、GitHub release 无资产），
+    # 固定到社区镜像 alpine/minio 的最后一个上游构建 tag，与下架前最后的
+    # 官方 RELEASE 同源；后续应评估迁移到维护中的 S3 兼容实现。
+    # user: root 与下架前官方镜像行为一致：compose 预建的命名卷为 root 属主，
+    # 该镜像默认的非 root 用户会 "Unable to initialize backend: file access
+    # denied" 崩溃循环（官方镜像初始化的旧卷同样只有 root 能写）。
+    image: alpine/minio:RELEASE.2025-10-15T17-29-55Z
+    user: "0"
     command: ["server", "/data"]
     environment:
       MINIO_ROOT_USER: ${BIDCOPILOT_MINIO_USER:-bidcopilot}
@@ -57,10 +63,13 @@ services:
     image: bidcopilot:single
     environment:
       # 外置数据层开关：跳过镜像内 PostgreSQL/Redis/MinIO 自启；
-      # 演示种子数据默认不灌入（BIDCOPILOT_SEED_DEMO=1 可显式开启）。
+      # 演示种子默认不灌入（BIDCOPILOT_SEED_DEMO=1 可显式开启，
+      # 开启时必须同时提供 BIDCOPILOT_DEMO_PASSWORD，缺失容器拒绝启动）。
       BIDCOPILOT_EXTERNAL_SERVICES: "1"
       APP_ENV: production
       SCHEDULER_ENABLED: "true"
+      BIDCOPILOT_SEED_DEMO: ${BIDCOPILOT_SEED_DEMO:-0}
+      BIDCOPILOT_DEMO_PASSWORD: ${BIDCOPILOT_DEMO_PASSWORD:-}
       DATABASE_URL: postgresql+asyncpg://${BIDCOPILOT_DB_USER:-bidcopilot}:${BIDCOPILOT_DB_PASSWORD:-bidcopilot}@postgres:5432/${BIDCOPILOT_DB_NAME:-bidcopilot}
       REDIS_URL: redis://redis:6379/0
       SNAPSHOT_STORE: minio

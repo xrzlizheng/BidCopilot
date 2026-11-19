@@ -170,6 +170,7 @@ docker exec bidcopilot-app psql -U bidcopilot -d bidcopilot -tAc "select count(*
 - 调度器多实例互斥（K8s/SaaS 多副本正确性地基）：`tests/unit/test_scheduler_lock.py` 5 passed（未获锁即跳过执行）；Celery 退役后全量 `uv run pytest -q` **280 passed / 3 skipped**。
 - 外置数据层形态：`docker compose -f deploy/external/docker-compose.yml up -d` → `/healthz` `{"status":"ok","version":"0.1.0"}`（应用连外部 PostgreSQL/Redis）；迁移在外部库执行至 `0041_paid_call_quotas`（54 表）；外部 MinIO put/get ok；演示种子默认不灌（users=0）。
 - 外置空库事后补种子（2026-11-19 实测）：临时 project `bidcopilot-exttest`、端口 `BIDCOPILOT_WEB_PORT=18082` 启动 → 空库 `POST /api/v1/auth/login` **401**（无任何账号）→ `docker exec -w /opt/bidcopilot/backend bidcopilot-exttest-bidcopilot-1 bash -c 'JWT_SECRET_KEY="$(cat /data/jwt.key)" python -m app.cli seed-demo --password "<口令>"'` → 同一登录 **200**；实测后 `docker compose -p bidcopilot-exttest down -v` 清理。单机容器同命令幂等重灌亦实测通过（`bidcopilot-app`，另需 `-e DATABASE_URL='postgresql+asyncpg://bidcopilot:bidcopilot@127.0.0.1:5432/bidcopilot'`）。
+- 外置形态部署时灌种子 + MinIO 镜像迁移 + 部署文档实测（2026-11-19）：external compose 透传 `BIDCOPILOT_SEED_DEMO`/`BIDCOPILOT_DEMO_PASSWORD`——缺口令启动容器打出 `BIDCOPILOT_SEED_DEMO=1 requires BIDCOPILOT_DEMO_PASSWORD` 拒绝启动；带口令 `BIDCOPILOT_WEB_PORT=18086 BIDCOPILOT_SEED_DEMO=1 ... docker compose -p bidcopilot-docverify -f deploy/external/docker-compose.yml up -d` → `/healthz` ok、应用日志 `demo tenant: demo`、`demo@example.com` 登录 **200**；README 事后补种子命令对该栈重灌幂等（原口令再登录仍 **200**）。MinIO 官方镜像 2026-09-11 自 Docker Hub 下架（dl.min.io 410、quay 401、GitHub 无资产）后固定 `alpine/minio:RELEASE.2025-10-15T17-29-55Z` 并加 `user:"0"`（修非 root 用户对 root 属主卷 `Unable to initialize backend: file access denied` 的崩溃循环）；allin1 临时容器（验证镜像 `bidcopilot:minio-verify`，`docker run -p 127.0.0.1:18085:80 -e BIDCOPILOT_SEED_DEMO=1 -e BIDCOPILOT_DEMO_PASSWORD=...`）实测内置 MinIO `health/live` ok、`/data/jwt.key`+`/data/minio-root.key` 首启生成、`GET /login` 200、登录 **200**；`docker compose -p bidcopilot-docverify down -v` 清理全部容器/卷/网络。`scripts/run_local_site.sh` 端口守卫：`WEB_PORT=18090` 直接拒绝并指引外置形态。
 - K8s Chart（重构为单体器件拓扑）：`helm lint` 0 failed；`helm template` 渲染 Secret/ConfigMap/Service/Deployment/Ingress/Job 共 6 个资源且 YAML 合法；缺 `secrets.databaseUrl` 时 required 守卫生效。首次 install 冒烟待 K8s 环境（ADR-0001 验证要求）。
 
 OCR 供应商实测（MinerU 4）：镜像内 `mineru-kit models download --tier basic --small-backend onnx` bake 成功（模型 819MB，`models verify` ok，`MINERU_MODEL_SOURCE=local` 离线可读）；上传 290KB 无文字层扫描模拟 PDF 首扫 16.7s（含 ONNX 模型加载）、热模型二次 3.8s，`parse_meta.ocr_provider="mineru"`、`ocr_structure_used=true`，资格 4 条/预算 480 万元文本与原图一字不差。
@@ -343,65 +344,92 @@ python scripts/check_secrets.py
 | 形态 | manifest | 数据层 | 冒烟状态 |
 |---|---|---|---|
 | 单机（默认） | `deploy/allin1/docker-compose.yml` | 容器内置 PostgreSQL / Redis / MinIO | 全链路实测（`scripts/run_local_site.sh` + `scripts/smoke_demo.py`） |
-| 数据层分离（VM / SaaS 数据层用法） | `deploy/external/docker-compose.yml` | 独立或托管 PostgreSQL / Redis / MinIO，经 env 外置 | 启动 + `/healthz` + 迁移至 head + 外部 MinIO 读写实测 |
+| 数据层分离（VM / SaaS 数据层用法） | `deploy/external/docker-compose.yml` | 独立或托管 PostgreSQL / Redis / MinIO，经 env 外置 | 启动 + `/healthz` + 迁移至 head + 外部 MinIO 读写 + 部署时种子与登录 200 实测（2026-11-19） |
 | 客户 K8s | `deploy/helm/bidcopilot/` | 集群内或托管实例，`BIDCOPILOT_EXTERNAL_SERVICES=true` | `helm lint` / `helm template` 通过；首次 install 冒烟待 K8s 环境 |
 
-### 单机（默认）
+### 部署前须知
+
+| 项 | 要求 |
+|---|---|
+| Docker | Docker Engine 24+ 与 Compose v2（`docker compose version` 可用；docker-compose v1 不支持） |
+| 资源 | ≥ 4 GB 内存、≥ 10 GB 磁盘（镜像约 7 GB，另加数据） |
+| 端口 | 单机固定 `127.0.0.1:18080`；外置默认 18080，`BIDCOPILOT_WEB_PORT` 可改 |
+| 网络 | 基础镜像经 Docker Hub 拉取；网络受限环境先配 registry mirror |
+| 首次构建 | 拉基础镜像 + 前端构建 + 烘焙本地 OCR 模型，通常 10–30 分钟 |
+
+访问地址默认只绑定 `127.0.0.1`（安全默认，不直接暴露公网）。部署在远程服务器时，本机
+`ssh -L 18080:127.0.0.1:18080 <user>@<server>` 建隧道后访问 `http://127.0.0.1:18080`；
+内网可信环境也可自行把 compose 的 `ports` 改为 `0.0.0.0`——此时必须同时用强口令覆盖
+数据层默认凭据（见「快速开始：数据层分离」的兜底凭据表）。
+
+#### 环境变量：哪些必须配置
+
+**试用部署必须填写的变量是 0 个**：单机形态 `cp deploy/.env.example deploy/.env` 原样即可
+（留空的密钥由容器首启自动生成并持久化）；外置形态连 `.env` 都不需要。其余变量按需再加：
+
+| 变量 | 控制什么 | 默认 | 什么时候必须配 |
+|---|---|---|---|
+| `BIDCOPILOT_DEMO_PASSWORD` | 演示账号口令 | 无 | 必须与 `BIDCOPILOT_SEED_DEMO=1` **成对**给：只给口令不灌种子，只给 `=1` 容器拒绝启动 |
+| `BIDCOPILOT_SEED_DEMO` | 启动时灌演示数据 | `0` | 需要演示账号时设 `1` |
+| `KEEPRISK_APP_CODE` | 商机发现（标讯订阅/详情） | 空 | 用商机功能时；留空仅该模块不可用 |
+| `LLM_BASE_URL` / `LLM_API_KEY` / `LLM_MODEL` | AI 生成/评标/合同深审 | 空 | 用 AI 能力时（OpenAI 兼容网关） |
+| `MINIMAX_API_KEY` | 扫描件云端 OCR | 空 | 需要时；缺省自动回落本地 MinerU（镜像已内置） |
+| `DEEPSEEK_SEARCH_API_KEY` 等 | 生成时联网检索 | 空 | 需要引用检索时 |
+| `SMTP_HOST` 等 | 邮件通知 | 空 | 需要邮件推送时 |
+| `BIDCOPILOT_DB_PASSWORD` 等 | 外置 PostgreSQL/MinIO 凭据 | 弱兜底值 | 数据服务端口对外暴露时必须强随机 |
+| `JWT_SECRET_KEY` / `MODEL_SECRET_MASTER_KEY` | 会话签名 / 信封加密 | 空 | 留空=首启自动生成并持久化（推荐）；多实例共享时显式填 |
+
+单机形态在 `deploy/.env` 里改；外置形态经命令行环境变量传（外置 compose 不读 `deploy/.env`）。
+注意 `BIDCOPILOT_SEED_DEMO` / `BIDCOPILOT_DEMO_PASSWORD` 两种形态都经命令行传入，写在
+`deploy/.env` 里会被 compose environment 覆盖、不生效。
+
+### 快速开始：单机（默认形态）
 
 ```bash
-cp deploy/.env.example deploy/.env   # 填入 JWT/KeepRisk/LLM/MinIO 凭据
-# 本地冒烟需显式提供演示口令（不内置默认值；生产形态 BIDCOPILOT_SEED_DEMO=0 可不设）
-BIDCOPILOT_DEMO_PASSWORD='<本地演示口令>' bash scripts/run_local_site.sh   # 唯一启动入口；http://127.0.0.1:18080
+# 1) 克隆并进入仓库
+git clone https://github.com/xrzlizheng/BidCopilot.git && cd BidCopilot
+# 2) 准备配置文件（试用无需改动任何值）
+cp deploy/.env.example deploy/.env
+# 3) 启动：口令自设，将成为演示账号的登录口令
+BIDCOPILOT_DEMO_PASSWORD='<你的演示口令>' bash scripts/run_local_site.sh
 ```
 
-容器 `bidcopilot-app` 内含应用、PostgreSQL、Redis、MinIO 与 nginx，暴露
-`http://localhost:18080`；`/api` 由同一容器内的 nginx 同源转发。本地测试与生产
-使用同一镜像、同一容器名。
+首次运行会先构建镜像（见部署前须知），完成后脚本打印 `BidCopilot: http://127.0.0.1:18080/login`
+即成功。第 4 步：浏览器打开该地址，用 `demo@example.com` + 你设置的口令登录。
 
-以 `BIDCOPILOT_SEED_DEMO=0` 启动（生产形态）即为无账号空库：没有任何登录账号，
-也没有自助注册入口，登录页能打开但登录一律 401。已在运行的容器可不停机补灌
-演示种子（幂等，可重复执行）：
+容器 `bidcopilot-app` 内含应用、PostgreSQL、Redis、MinIO 与 nginx（`/api` 同源转发），数据
+保存在 docker 卷 `bidcopilot_data`；本地测试与生产使用同一镜像、同一容器名，端口固定
+`127.0.0.1:18080`（改端口请用外置形态）。不需要演示账号时（生产口径）：
 
 ```bash
-docker exec -w /opt/bidcopilot/backend \
-  -e DATABASE_URL='postgresql+asyncpg://bidcopilot:bidcopilot@127.0.0.1:5432/bidcopilot' \
-  bidcopilot-app python -m app.cli seed-demo --password '<口令>'
+BIDCOPILOT_SEED_DEMO=0 bash scripts/run_local_site.sh
 ```
 
-（单机容器的 `JWT_SECRET_KEY` 由 `deploy/.env` 经 compose `env_file` 注入，
-`docker exec` 直接继承；`DATABASE_URL` 是 entrypoint 的容器内默认值，不在镜像
-ENV 里，必须显式传。）
+此时是无账号空库：没有任何登录账号，也没有自助注册入口，登录页能打开但登录一律 401
+（安全设计，不内置默认口令），事后可用下文「事后补种子」命令补灌。
 
-若 Docker Hub 在本机不可达，先为 Docker Desktop 配置可用的 registry mirror；`docker compose config` 不需要拉取镜像，仍可用于校验配置。
-
-### 数据层分离（VM / SaaS 数据层用法）
+### 快速开始：数据层分离（VM / SaaS 数据层用法）
 
 ```bash
-docker compose -f deploy/external/docker-compose.yml up -d   # 默认 127.0.0.1:18080
-# 与单机形态同时运行时改端口：
-BIDCOPILOT_WEB_PORT=18081 docker compose -f deploy/external/docker-compose.yml up -d
+cd BidCopilot
+# 1) 启动（不需要 .env；两变量一起给=部署时自动灌入演示账号）
+BIDCOPILOT_SEED_DEMO=1 BIDCOPILOT_DEMO_PASSWORD='<你的演示口令>' \
+  docker compose -f deploy/external/docker-compose.yml up -d
+# 18080 被占用时换端口：
+BIDCOPILOT_WEB_PORT=18081 BIDCOPILOT_SEED_DEMO=1 BIDCOPILOT_DEMO_PASSWORD='<你的演示口令>' \
+  docker compose -f deploy/external/docker-compose.yml up -d
+# 2) 等待就绪（首次约 1–2 分钟，含数据库迁移），确认返回 {"status":"ok",...}
+curl http://127.0.0.1:18080/healthz
 ```
 
-应用容器不启动镜像内置服务（`BIDCOPILOT_EXTERNAL_SERVICES=true`），经环境变量连接
-独立的 PostgreSQL / Redis / MinIO；把 compose 中的三个数据服务换成托管实例，即为
-SaaS 的数据层用法。外置形态默认不灌演示种子数据（避免生产环境留下默认演示账号），
-确需演示数据时设 `BIDCOPILOT_SEED_DEMO=1` 并显式提供 `BIDCOPILOT_DEMO_PASSWORD`
-（缺失时容器拒绝启动，不再内置默认口令）。数据库 / MinIO 口令用
-`BIDCOPILOT_DB_PASSWORD` / `BIDCOPILOT_MINIO_PASSWORD` 等环境变量覆盖，不要提交明文。
+第 3 步：浏览器打开 `http://127.0.0.1:18080/login`，用 `demo@example.com` + 口令登录。
+应用容器不启动镜像内置数据层（`BIDCOPILOT_EXTERNAL_SERVICES=1`），连接独立的
+PostgreSQL / Redis / MinIO；把这三个服务换成托管实例，即为 SaaS 的数据层用法。
 
-默认启动即为无账号空库：没有任何登录账号，也没有自助注册入口，登录页能打开但
-`/api/v1/auth/login` 一律 401。已在运行的容器可不停机补灌演示种子（幂等，实测见
-上文冒烟记录的外置空库条目）：
-
-```bash
-# 容器名默认 bidcopilot-external-bidcopilot-1，以 docker ps 为准
-docker exec -w /opt/bidcopilot/backend bidcopilot-external-bidcopilot-1 \
-  bash -c 'JWT_SECRET_KEY="$(cat /data/jwt.key)" python -m app.cli seed-demo --password "<口令>"'
-```
-
-`JWT_SECRET_KEY` 由 entrypoint 启动时生成并持久化在容器内 `/data/jwt.key`，不在
-compose 环境变量里，`docker exec` 不会继承，必须像上面这样显式带上，否则
-`app.config.Settings` 校验失败直接退出。
+种子开关口径（与单机不同，单机由 `scripts/run_local_site.sh` 默认开启）：
+省略这两个变量即为生产空库口径；**只给 `BIDCOPILOT_SEED_DEMO=1` 不给口令** → 容器
+拒绝启动（日志 `BIDCOPILOT_SEED_DEMO=1 requires BIDCOPILOT_DEMO_PASSWORD`）；
+**只给口令不给 `=1`** → 不灌种子（空库，登录一律 401）。
 
 compose 为三个数据服务写了兜底凭据，仅适合本机联调；对外部署必须用环境变量
 覆盖（compose 不校验强度，不要用默认值上生产）：
@@ -411,6 +439,51 @@ compose 为三个数据服务写了兜底凭据，仅适合本机联调；对外
 | PostgreSQL | 用户/口令 `bidcopilot` / `bidcopilot`，库 `bidcopilot` | `BIDCOPILOT_DB_PASSWORD`（另有 `BIDCOPILOT_DB_USER`、`BIDCOPILOT_DB_NAME`） |
 | MinIO | `bidcopilot` / `bidcopilot-demo-secret` | `BIDCOPILOT_MINIO_PASSWORD`（另有 `BIDCOPILOT_MINIO_USER`、`BIDCOPILOT_MINIO_BUCKET`） |
 | Redis | 无认证，compose 未暴露口令参数 | —（对外部署换托管实例，或自行改 manifest 加 `requirepass`） |
+
+### 事后补种子（幂等，可重复执行）
+
+已在运行的容器可不停机补灌演示种子；重复执行不会覆盖已改过的口令：
+
+```bash
+# 单机（JWT_SECRET_KEY 经 deploy/.env 由 compose env_file 注入，docker exec 直接继承；
+# DATABASE_URL 是 entrypoint 的容器内默认值，不在镜像 ENV 里，必须显式传）
+docker exec -w /opt/bidcopilot/backend \
+  -e DATABASE_URL='postgresql+asyncpg://bidcopilot:bidcopilot@127.0.0.1:5432/bidcopilot' \
+  bidcopilot-app python -m app.cli seed-demo --password '<口令>'
+
+# 外置（JWT 由 entrypoint 生成并持久化在 /data/jwt.key，docker exec 不继承，必须显式带上）
+docker exec -w /opt/bidcopilot/backend bidcopilot-external-bidcopilot-1 \
+  bash -c 'JWT_SECRET_KEY="$(cat /data/jwt.key)" python -m app.cli seed-demo --password "<口令>"'
+```
+
+容器名以 `docker ps` 为准；Windows Git Bash 下执行需前缀 `MSYS_NO_PATHCONV=1`，
+否则 `-w /opt/...` 会被路径转换破坏（报 `Cwd must be an absolute path`）。
+
+### 常见问题排查
+
+| 症状 | 原因 | 处置 |
+|---|---|---|
+| 登录页能打开，任何账号都报"邮箱或密码不正确"（401） | 无账号空库（生产默认不灌种子、无自助注册，不内置默认口令） | 执行「事后补种子」，然后 `demo@example.com` + 口令登录 |
+| 连续登录失败后 429 | 登录限流：账号 5 次 + IP 20 次 / 5 分钟 | 等 5 分钟再试（`LOGIN_MAX_ATTEMPTS` 等可调） |
+| MinIO 容器反复重启，日志 `Unable to initialize backend: file access denied` | MinIO 镜像以非 root 运行，而 compose 预建卷 / 旧官方镜像初始化的卷是 root 属主 | 本仓 compose 已加 `user: "0"`（与下架前官方镜像一致）；自行改过 compose 的保留该行 |
+| 旧版 Navicat 连库报 `column "datlastsysid" does not exist` | 客户端太旧：该系统列 PostgreSQL 15+ 已移除，与业务表无关 | 升级 Navicat ≥16.1（或 15.0.29+），或改用 DBeaver / 容器内 psql |
+| 浏览器打不开 `http://<服务器IP>:18080` | compose 默认只绑 `127.0.0.1` | SSH 隧道 `ssh -L 18080:127.0.0.1:18080 <user>@<server>`；内网可信环境可改 `ports` 为 `0.0.0.0` 并给数据层配强口令 |
+| `docker pull minio/minio` 报 repository does not exist | 上游 MinIO 官方镜像已于 2026-09-11 从 Docker Hub 下架 | 本仓已固定 `alpine/minio:RELEASE.2025-10-15T17-29-55Z`，不要改回 `minio/minio` |
+| 单机启动报 `env file ...deploy\.env not found` | 缺配置文件 | `cp deploy/.env.example deploy/.env` |
+| 18080 端口被占用 | 单机与外置形态共用 18080，同时只能跑一个 | 外置用 `BIDCOPILOT_WEB_PORT` 换端口，或先 `down` 另一个 |
+| 镜像拉取超时/失败 | 本机到 Docker Hub 不通 | 为 Docker 配 registry mirror 后重试；`docker compose config` 不需要拉镜像，可用于校验配置 |
+
+### 运维速查
+
+| 操作 | 单机 | 外置 |
+|---|---|---|
+| 看日志 | `docker compose -f deploy/allin1/docker-compose.yml logs -f` | `docker compose -f deploy/external/docker-compose.yml logs -f` |
+| 停止（保留数据） | 同上，`down` | 同上，`down` |
+| 彻底清理（删全部数据） | 同上，`down -v`（慎用） | 同上，`down -v`（慎用） |
+| 升级 | `git pull && docker compose -f deploy/allin1/docker-compose.yml up -d --build` | `git pull && docker compose -f deploy/external/docker-compose.yml up -d --build` |
+| 数据位置 | docker 卷 `bidcopilot_data` | 卷 `bidcopilot-external_pgdata` / `_miniodata` / `_appdata` |
+
+升级时数据库迁移自动执行（`alembic upgrade head`）；已有账号不受影响，演示种子幂等、重跑安全。
 
 ### Helm（客户 K8s）
 

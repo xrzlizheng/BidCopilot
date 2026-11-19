@@ -43,10 +43,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 COPY --from=backend /opt/bidcopilot/backend /opt/bidcopilot/backend
 COPY --from=frontend /app /opt/bidcopilot/frontend
-# minio 二进制从官方镜像提取（容器内置 MinIO 服务用）。
-# 注意：minio/minio:latest 未固定版本——交付发布前必须固定为已验证的稳定 tag
-# （当前交付机无法访问 registry 核实最新稳定版，见交付报告「已知限制」）。
-COPY --from=minio/minio:latest /usr/bin/minio /usr/local/bin/minio
+# minio 二进制从社区镜像提取（容器内置 MinIO 服务用）。上游 MinIO 社区版已
+# EOL：官方镜像 2026-09-11 从 Docker Hub 下架，固定到 alpine/minio 的最后一个
+# 上游构建 tag（与下架前最后的官方 RELEASE 同源）；后续应评估迁移到维护中的
+# S3 兼容实现。
+COPY --from=alpine/minio:RELEASE.2025-10-15T17-29-55Z /usr/local/bin/minio /usr/local/bin/minio
 COPY deploy/allin1/nginx.conf /etc/nginx/sites-available/default
 
 # 构建期预热 MinerU basic 档模型进镜像（ONNX 小模型，纯 CPU）。

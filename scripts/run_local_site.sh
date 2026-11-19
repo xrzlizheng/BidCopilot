@@ -6,6 +6,16 @@ WEB_PORT="${WEB_PORT:-18080}"
 SINGLE_COMPOSE="${SINGLE_COMPOSE:-$ROOT/deploy/allin1/docker-compose.yml}"
 COMPOSE=(docker compose -f "$SINGLE_COMPOSE")
 
+# 单机形态端口锁定 18080（allin1 compose 固定绑定且容器名固定）：
+# 在这里改 WEB_PORT 只会让下面的健康检查打错端口，容器本身仍监听 18080。
+# 需要自定义端口请改用外置形态的 BIDCOPILOT_WEB_PORT。
+if [ "$WEB_PORT" != "18080" ]; then
+  echo "单机形态固定监听 18080，WEB_PORT=$WEB_PORT 不生效。" >&2
+  echo "需要自定义端口请用外置形态：" >&2
+  echo "  BIDCOPILOT_WEB_PORT=<port> docker compose -f deploy/external/docker-compose.yml up -d" >&2
+  exit 1
+fi
+
 if ! command -v docker >/dev/null 2>&1; then
   echo "docker is required" >&2
   exit 1

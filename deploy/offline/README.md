@@ -23,13 +23,21 @@ cd bidcopilot-offline-<VERSION>
 sha256sum -c SHA256SUMS
 docker load -i images.tar
 cp deploy/.env.example deploy/.env
-# 填写 KeepRisk/LLM/MinIO 凭据；JWT_SECRET_KEY 留空时容器首启自动生成并持久化
+# 试用无需改动任何值：留空密钥（JWT/MINIO 等）容器首启自动生成并持久化；
+# 需要商机/AI/邮件等功能时再按 deploy/.env 注释填写
 docker compose -f deploy/allin1/docker-compose.yml up -d
 curl -fsS http://localhost:18080/healthz
 ```
 
-演示种子默认不灌入；确需演示数据时设置 `BIDCOPILOT_SEED_DEMO=1` 并提供
-`BIDCOPILOT_DEMO_PASSWORD`（见 `deploy/.env.example`）。
+演示种子默认不灌入；确需演示数据时经**命令行**环境变量传入（写在 `deploy/.env` 会被
+compose 覆盖、不生效）：
+
+```bash
+BIDCOPILOT_SEED_DEMO=1 BIDCOPILOT_DEMO_PASSWORD='<口令>' \
+  docker compose -f deploy/allin1/docker-compose.yml up -d
+```
+
+登录页 `http://localhost:18080/login`，账号 `demo@example.com`。
 
 ## Helm 安装
 
