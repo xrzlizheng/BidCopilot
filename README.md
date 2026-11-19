@@ -169,6 +169,7 @@ docker exec bidcopilot-app psql -U bidcopilot -d bidcopilot -tAc "select count(*
 
 - 调度器多实例互斥（K8s/SaaS 多副本正确性地基）：`tests/unit/test_scheduler_lock.py` 5 passed（未获锁即跳过执行）；Celery 退役后全量 `uv run pytest -q` **280 passed / 3 skipped**。
 - 外置数据层形态：`docker compose -f deploy/external/docker-compose.yml up -d` → `/healthz` `{"status":"ok","version":"0.1.0"}`（应用连外部 PostgreSQL/Redis）；迁移在外部库执行至 `0041_paid_call_quotas`（54 表）；外部 MinIO put/get ok；演示种子默认不灌（users=0）。
+- 外置空库事后补种子（2026-11-19 实测）：临时 project `bidcopilot-exttest`、端口 `BIDCOPILOT_WEB_PORT=18082` 启动 → 空库 `POST /api/v1/auth/login` **401**（无任何账号）→ `docker exec -w /opt/bidcopilot/backend bidcopilot-exttest-bidcopilot-1 bash -c 'JWT_SECRET_KEY="$(cat /data/jwt.key)" python -m app.cli seed-demo --password "<口令>"'` → 同一登录 **200**；实测后 `docker compose -p bidcopilot-exttest down -v` 清理。单机容器同命令幂等重灌亦实测通过（`bidcopilot-app`，另需 `-e DATABASE_URL='postgresql+asyncpg://bidcopilot:bidcopilot@127.0.0.1:5432/bidcopilot'`）。
 - K8s Chart（重构为单体器件拓扑）：`helm lint` 0 failed；`helm template` 渲染 Secret/ConfigMap/Service/Deployment/Ingress/Job 共 6 个资源且 YAML 合法；缺 `secrets.databaseUrl` 时 required 守卫生效。首次 install 冒烟待 K8s 环境（ADR-0001 验证要求）。
 
 OCR 供应商实测（MinerU 4）：镜像内 `mineru-kit models download --tier basic --small-backend onnx` bake 成功（模型 819MB，`models verify` ok，`MINERU_MODEL_SOURCE=local` 离线可读）；上传 290KB 无文字层扫描模拟 PDF 首扫 16.7s（含 ONNX 模型加载）、热模型二次 3.8s，`parse_meta.ocr_provider="mineru"`、`ocr_structure_used=true`，资格 4 条/预算 480 万元文本与原图一字不差。
@@ -357,6 +358,20 @@ BIDCOPILOT_DEMO_PASSWORD='<本地演示口令>' bash scripts/run_local_site.sh  
 `http://localhost:18080`；`/api` 由同一容器内的 nginx 同源转发。本地测试与生产
 使用同一镜像、同一容器名。
 
+以 `BIDCOPILOT_SEED_DEMO=0` 启动（生产形态）即为无账号空库：没有任何登录账号，
+也没有自助注册入口，登录页能打开但登录一律 401。已在运行的容器可不停机补灌
+演示种子（幂等，可重复执行）：
+
+```bash
+docker exec -w /opt/bidcopilot/backend \
+  -e DATABASE_URL='postgresql+asyncpg://bidcopilot:bidcopilot@127.0.0.1:5432/bidcopilot' \
+  bidcopilot-app python -m app.cli seed-demo --password '<口令>'
+```
+
+（单机容器的 `JWT_SECRET_KEY` 由 `deploy/.env` 经 compose `env_file` 注入，
+`docker exec` 直接继承；`DATABASE_URL` 是 entrypoint 的容器内默认值，不在镜像
+ENV 里，必须显式传。）
+
 若 Docker Hub 在本机不可达，先为 Docker Desktop 配置可用的 registry mirror；`docker compose config` 不需要拉取镜像，仍可用于校验配置。
 
 ### 数据层分离（VM / SaaS 数据层用法）
@@ -373,6 +388,29 @@ SaaS 的数据层用法。外置形态默认不灌演示种子数据（避免生
 确需演示数据时设 `BIDCOPILOT_SEED_DEMO=1` 并显式提供 `BIDCOPILOT_DEMO_PASSWORD`
 （缺失时容器拒绝启动，不再内置默认口令）。数据库 / MinIO 口令用
 `BIDCOPILOT_DB_PASSWORD` / `BIDCOPILOT_MINIO_PASSWORD` 等环境变量覆盖，不要提交明文。
+
+默认启动即为无账号空库：没有任何登录账号，也没有自助注册入口，登录页能打开但
+`/api/v1/auth/login` 一律 401。已在运行的容器可不停机补灌演示种子（幂等，实测见
+上文冒烟记录的外置空库条目）：
+
+```bash
+# 容器名默认 bidcopilot-external-bidcopilot-1，以 docker ps 为准
+docker exec -w /opt/bidcopilot/backend bidcopilot-external-bidcopilot-1 \
+  bash -c 'JWT_SECRET_KEY="$(cat /data/jwt.key)" python -m app.cli seed-demo --password "<口令>"'
+```
+
+`JWT_SECRET_KEY` 由 entrypoint 启动时生成并持久化在容器内 `/data/jwt.key`，不在
+compose 环境变量里，`docker exec` 不会继承，必须像上面这样显式带上，否则
+`app.config.Settings` 校验失败直接退出。
+
+compose 为三个数据服务写了兜底凭据，仅适合本机联调；对外部署必须用环境变量
+覆盖（compose 不校验强度，不要用默认值上生产）：
+
+| 服务 | 兜底默认值 | 覆盖变量 |
+|---|---|---|
+| PostgreSQL | 用户/口令 `bidcopilot` / `bidcopilot`，库 `bidcopilot` | `BIDCOPILOT_DB_PASSWORD`（另有 `BIDCOPILOT_DB_USER`、`BIDCOPILOT_DB_NAME`） |
+| MinIO | `bidcopilot` / `bidcopilot-demo-secret` | `BIDCOPILOT_MINIO_PASSWORD`（另有 `BIDCOPILOT_MINIO_USER`、`BIDCOPILOT_MINIO_BUCKET`） |
+| Redis | 无认证，compose 未暴露口令参数 | —（对外部署换托管实例，或自行改 manifest 加 `requirepass`） |
 
 ### Helm（客户 K8s）
 
