@@ -466,6 +466,7 @@ docker exec -w /opt/bidcopilot/backend bidcopilot-external-bidcopilot-1 \
 | 登录页能打开，任何账号都报"邮箱或密码不正确"（401） | 无账号空库（生产默认不灌种子、无自助注册，不内置默认口令） | 执行「事后补种子」，然后 `demo@example.com` + 口令登录 |
 | 连续登录失败后 429 | 登录限流：账号 5 次 + IP 20 次 / 5 分钟 | 等 5 分钟再试（`LOGIN_MAX_ATTEMPTS` 等可调） |
 | MinIO 容器反复重启，日志 `Unable to initialize backend: file access denied` | MinIO 镜像以非 root 运行，而 compose 预建卷 / 旧官方镜像初始化的卷是 root 属主 | 本仓 compose 已加 `user: "0"`（与下架前官方镜像一致）；自行改过 compose 的保留该行 |
+| 单机容器反复重启，日志 `Can't locate revision identified by '...'` | 数据卷里的库由另一版本/形态的镜像迁移过，该 revision 不在当前镜像的迁移脚本里 | 换回原来那个镜像继续用；确要切换且数据可弃时，`down -v` 以全新数据卷重新首装（业务数据会删除，慎用） |
 | 旧版 Navicat 连库报 `column "datlastsysid" does not exist` | 客户端太旧：该系统列 PostgreSQL 15+ 已移除，与业务表无关 | 升级 Navicat ≥16.1（或 15.0.29+），或改用 DBeaver / 容器内 psql |
 | 浏览器打不开 `http://<服务器IP>:18080` | compose 默认只绑 `127.0.0.1` | SSH 隧道 `ssh -L 18080:127.0.0.1:18080 <user>@<server>`；内网可信环境可改 `ports` 为 `0.0.0.0` 并给数据层配强口令 |
 | `docker pull minio/minio` 报 repository does not exist | 上游 MinIO 官方镜像已于 2026-09-11 从 Docker Hub 下架 | 本仓已固定 `alpine/minio:RELEASE.2025-10-15T17-29-55Z`，不要改回 `minio/minio` |
