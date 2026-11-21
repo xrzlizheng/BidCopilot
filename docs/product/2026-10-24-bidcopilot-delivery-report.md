@@ -152,12 +152,12 @@ nginx 对 `/api/` 与 `/` 的 send/read 超时放宽到 300s（LLM 生成与评�
 
 ## 5. 测试与质量门禁
 
-### 5.1 测试分层（264 条）
+### 5.1 测试分层（973 条，2026-11-19 社区版实测）
 
 | 层 | 数量 | 说明 |
 |---|---|---|
-| unit（35 文件） | 195 | 解析/规则/格式/JWT/权限/配置/客户端（respx 打桩） |
-| integration（37 文件） | 68 | 真实 PostgreSQL（compose 55432 口）+ ASGITransport 打真实 app；覆盖全部主要 API 面 |
+| unit（77 文件） | 792 | 解析/规则/格式/JWT/权限/配置/客户端（respx 打桩）；2 个环境性 skip |
+| integration（74 文件） | 181 | 真实 PostgreSQL（容器 25432 口）+ ASGITransport 打真实 app；覆盖全部主要 API 面 |
 | gateway_live | 1 | 真实 KeepRisk 计费冒烟，默认 skip（`GATEWAY_LIVE=1` 手工门禁） |
 | 金标基线 | 语料级 | 19 份对抗语料（docx/pdf/txt/md 四版式）：评分 54/54、资格 36/36、废标 22/22，micro P/R 1.000 |
 
@@ -254,7 +254,7 @@ BidCopilot/
 | 6 | 集成测试默认全量跑 | 无 `-m "not integration"` 兜底，无本地 PG 的环境需显式 `pytest tests/unit`。 |
 | 7 | Redis 无持久化 | 单容器演示形态可接受；生产化需评估调度/broker 重启语义。 |
 | 8 | fakeredis 未使用 | dev 依赖清理项。 |
-| 9 | `minio/minio:latest` 未固定版本 | `deploy/allin1/Dockerfile`（提取 minio 二进制）与 `deploy/external/docker-compose.yml`（MinIO 服务）引用 `minio/minio:latest`；当前交付机无法访问 registry 核实最新稳定版。**发布前必须固定为已验证的稳定 tag 并重新构建验证**（见上线检查单）。 |
+| 9 | ~~`minio/minio:latest` 未固定版本~~（2026-11-19 已闭环） | 上游官方镜像 2026-09-11 自 Docker Hub 下架；`deploy/allin1/Dockerfile` 与 `deploy/external/docker-compose.yml` 已固定 `alpine/minio:RELEASE.2025-10-15T17-29-55Z`，minio 服务加 `user: "0"`（该镜像默认非 root，预建 root 属主卷会崩溃循环）。清空本机 minio 镜像缓存后冷拉取重测通过。 |
 
 ---
 
@@ -266,8 +266,9 @@ BIDCOPILOT_DEMO_PASSWORD='<本地演示口令>' bash scripts/run_local_site.sh  
 
 # 测试
 cd backend && uv run pytest tests/unit -q # 单测
-cd backend && uv run pytest -q            # 全量（需 PG:55432）
+cd backend && uv run pytest -q            # 全量（需真实 PG，容器 25432 口）
 cd backend && uv run ruff check . && uv run mypy app
+# Windows 宿主 uv 启动器损坏时的替代写法见开发交接手册「跑测试」一节
 
 # 冒烟
 BIDCOPILOT_DEMO_PASSWORD='<本地演示口令>' python scripts/smoke_demo.py   # 部署后功能冒烟

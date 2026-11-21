@@ -84,7 +84,7 @@
 - 依赖装配：`backend/app/modules/gateway/deps.py`
 - 配置：`backend/app/config.py`（`KEEPRISK_MCP_*`）
 - 单测：`backend/tests/unit/test_keeprisk_mcp.py`（8 条，覆盖会话复用、SSE、错误、状态映射、计费字段）与 `backend/tests/unit/test_intel_router.py`（3 条，覆盖配额回冲、未计费释放、失败状态台账）；全量单测 `457 passed / 2 skipped`。
-- 集成测试：`backend/tests/integration/test_company_intel_mcp_api.py`（真实 PG + 依赖替换），验证接口返回、`cost_ledger` 与审计写入；本轮因本机 Docker/PostgreSQL 未启动未执行，需在 55432 可用时补跑。
+- 集成测试：`backend/tests/integration/test_company_intel_mcp_api.py`（真实 PG + 依赖替换），验证接口返回、`cost_ledger` 与审计写入；已随集成全量在真实 PostgreSQL 上跑通（2026-11-19：181 passed）。
 
 ## 5. 成本与配额
 
@@ -128,7 +128,7 @@
 | 项 | 命令/操作 | 结果 |
 |---|---|---|
 | 后端单测 | `pytest tests/unit -q` | 460 passed / 2 skipped |
-| 集成测试 | `DATABASE_URL=…:55432/bidcopilot_test pytest tests/integration/test_company_intel_mcp_api.py tests/integration/test_client_scope_api.py tests/integration/test_intel_watchlist_api.py tests/integration/test_tenant_plan_api.py -q` | 9 passed（profile/batch/compare + 客户隔离 + 监控 + 套餐 + 交标回执 + 文件体检） |
+| 集成测试 | `DATABASE_URL=…:25432/bidcopilot_test pytest tests/integration/test_company_intel_mcp_api.py tests/integration/test_client_scope_api.py tests/integration/test_intel_watchlist_api.py -q` | passed（profile/batch/compare + 客户隔离 + 监控 + 交标回执 + 文件体检）。套餐计量属企业版，其测试不在社区版代码树内 |
 | 镜像构建 | `docker compose -f deploy/allin1/docker-compose.yml build` | exit 0 |
 | 单容器重建 | `bash scripts/run_local_site.sh` | `bidcopilot-app` 重建、`/healthz` 200；最终镜像 ID `705f1eb5a2a2` |
 | 登录 | `POST /api/v1/auth/login`（demo） | 200 |
@@ -148,7 +148,7 @@
 | 监控订阅集成 | `test_intel_watchlist_api.py` | 1 passed：首次建基线、风险变化写 `intel_watchlist` 通知 |
 | 客户页浏览器 | `/clients` → 新建客户 → 添加成员 | 客户列表/成员面板渲染，成员添加成功 |
 | 资产页客户与监控 | `/assets` → 新建企业选客户 → 工商自检 → 监控当前主体/立即检查 | 企业按客户归属；监控列表与检查状态渲染 |
-| 套餐额度 | `test_tenant_plan_api.py` | 平台 PUT 套餐 → 项目/客户/席位超限均 429；用量接口返回套餐 |
+| 套餐额度（企业版能力） | 社区版为不限量空实现，相应测试随 overlay 留在企业版私有仓 | 平台 PUT 套餐 → 项目/客户/席位超限均 429；用量接口返回套餐 |
 | 交标回执 | `test_submission_receipt_api.py` | 记录回执并冻结自查快照；白标交付摘要；跨租户 404 |
 | 知识库冷启动 UI | `/knowledge` → 历史标书冷启动 | 2 个 txt 文件入库为案例/历史标书标签，解析成功 |
 | 白标交付 UI | 项目 → 响应与自查 → 客户交付摘要 | 客户品牌、47 项自查、回执与打印按钮渲染 |

@@ -397,7 +397,7 @@ FastAPI 模块化单体 ── PostgreSQL（业务数据）
 
 | 指标 | 数值 |
 |---|---|
-| 后端自动化测试 | 单元+集成 986 passed / 2 skipped（2026-11-17 复验；集成对真实 PostgreSQL `localhost:25432/bidcopilot_test` + Redis `6390` 实跑） |
+| 后端自动化测试 | 单元+集成 **973 passed / 2 skipped**（2026-11-19 社区版实测：单元 792、集成 181；集成对真实 PostgreSQL + Redis 实跑） |
 | 前端组件测试 | 20 文件 / 69 用例全部通过（2026-11-17 复验，`docker build --target frontend` 镜像内）；`tsc --noEmit` 0 |
 | 解析金标语料 | 19 份自编对抗语料（docx/pdf/txt/md），四维度 P/R 均 1.000（评分 54/54、资格 36/36、废标 22/22、预算/暗标 19 全对） |
 | 确定性合规规则 | 29 条（HARD 10 / SOFT 19） |

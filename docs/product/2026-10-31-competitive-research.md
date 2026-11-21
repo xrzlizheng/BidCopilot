@@ -280,9 +280,9 @@
 
 ```
 cd backend
-$env:DATABASE_URL="postgresql+asyncpg://bidcopilot:bidcopilot@localhost:55432/bidcopilot_test"
+$env:DATABASE_URL="postgresql+asyncpg://bidcopilot:bidcopilot@localhost:25432/bidcopilot_test"
 python -m alembic -c alembic.ini upgrade head
-python -m alembic -c alembic.ini heads   # → 0067_webhooks (head)
+python -m alembic -c alembic.ini heads   # → 0077_price_quotes (head)
 ```
 
 新增迁移：`0063_client_template_scope`、`0064_receipt_attachments`、`0065_ai_usage_metering`、`0066_api_tokens`、`0067_webhooks`、`0068_retire_client_scope`。
