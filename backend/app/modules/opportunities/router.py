@@ -9,6 +9,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ConflictError, NotFoundError, ValidationAppError
+from app.core.like import like_contains, like_prefix
 from app.core.region import filter_terms
 from app.db.locks import advisory_lock
 from app.db.session import get_session
@@ -107,16 +108,16 @@ async def list_opportunities(
     repo = OpportunityRepository(session, user.tenant_id)
     statement = repo.scoped(select(Opportunity))
     if q:
-        statement = statement.where(Opportunity.title.ilike(f"%{q}%"))
+        statement = statement.where(Opportunity.title.ilike(like_contains(q), escape="\\"))
     if region:
         # 能唯一确定的行政区（省名、带「市」的地级市、全国唯一的区县）用前缀匹配，
         # 避免「南」命中南京/济南/南宁；其余（如「朝阳」可能指北京朝阳区或辽宁
         # 朝阳市）退回模糊匹配——宁可多返回几条，也不能漏掉用户真正要找的。
         exact, term = filter_terms(region)
         if exact:
-            statement = statement.where(Opportunity.region.ilike(f"{term}%"))
+            statement = statement.where(Opportunity.region.ilike(like_prefix(term), escape="\\"))
         else:
-            statement = statement.where(Opportunity.region.ilike(f"%{term}%"))
+            statement = statement.where(Opportunity.region.ilike(like_contains(term), escape="\\"))
     if industry:
         statement = statement.where(Opportunity.industry.contains([industry]))
     if budget_min is not None:

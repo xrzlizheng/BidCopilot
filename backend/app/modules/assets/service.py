@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ConflictError, ForbiddenError, NotFoundError, ValidationAppError
+from app.core.like import like_contains
 from app.core.time import business_today
 from app.modules.assets.access import (
     can_read_org,
@@ -49,7 +50,7 @@ async def list_companies(session: AsyncSession, tenant_id: UUID, q: str | None) 
     repo = CompanyRepository(session, tenant_id)
     statement = repo.scoped(select(Company))
     if q:
-        statement = statement.where(Company.name.ilike(f"%{q}%"))
+        statement = statement.where(Company.name.ilike(like_contains(q), escape="\\"))
     return list((await session.execute(statement.order_by(Company.name))).scalars().all())
 
 
@@ -379,7 +380,7 @@ async def list_assets(
             text_column = model.check_item
         else:
             text_column = model.name
-        statement = statement.where(text_column.ilike(f"%{q}%"))
+        statement = statement.where(text_column.ilike(like_contains(q), escape="\\"))
     return list((await session.execute(statement.order_by(model.created_at.desc()))).scalars().all())
 
 

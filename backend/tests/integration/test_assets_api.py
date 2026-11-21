@@ -122,6 +122,15 @@ async def test_assets_crud_import_expiry_and_tenant_isolation() -> None:
             assert filtered_personnel.status_code == 200, filtered_personnel.text
             assert filtered_personnel.json()["total"] == 1
 
+            # 回归：用户输入里的 LIKE 通配符按字面量处理，单独一个 % 不得命中任何名称
+            literal_wildcard = await client.get(
+                "/api/v1/assets/qualifications",
+                params={"q": "%"},
+                headers=headers,
+            )
+            assert literal_wildcard.status_code == 200, literal_wildcard.text
+            assert literal_wildcard.json()["total"] == 0
+
             expiring = await client.get("/api/v1/assets/expiring?days=90", headers=headers)
             assert expiring.status_code == 200, expiring.text
             assert expiring.json()["total"] >= 2

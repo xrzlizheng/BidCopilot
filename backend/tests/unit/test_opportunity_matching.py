@@ -1,8 +1,8 @@
 from decimal import Decimal
 
+from app.core.like import like_contains
 from app.modules.opportunities.matching import (
     MatchPreference,
-    _like_contains,
     count_match_hits,
     preference_from_query,
     preferences_from_subscriptions,
@@ -68,6 +68,6 @@ def test_preferences_skip_subscriptions_without_conditions() -> None:
 
 
 def test_like_contains_treats_user_keywords_as_literals() -> None:
-    assert _like_contains("50%") == "%50\\%%"
-    assert _like_contains("a_b") == "%a\\_b%"
-    assert _like_contains("a\\b") == "%a\\\\b%"
+    assert like_contains("50%") == "%50\\%%"
+    assert like_contains("a_b") == "%a\\_b%"
+    assert like_contains("a\\b") == "%a\\\\b%"

@@ -6,6 +6,7 @@ from typing import Any
 
 from sqlalchemy import ColumnElement, case, false, literal, or_
 
+from app.core.like import like_contains
 from app.modules.opportunities.models import Opportunity, OpportunitySubscription
 
 KEYWORD_WEIGHT = 2
@@ -81,18 +82,12 @@ def preferences_from_subscriptions(
     return preferences
 
 
-def _like_contains(value: str) -> str:
-    """把用户关键词当字面量而非通配符，与 Python 子串判定保持一致。"""
-    escaped = value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
-    return f"%{escaped}%"
-
-
 def _keyword_expression(preference: MatchPreference) -> ColumnElement[bool]:
     if not preference.keywords:
         return false()
     return or_(
         *[
-            Opportunity.title.ilike(_like_contains(keyword), escape="\\")
+            Opportunity.title.ilike(like_contains(keyword), escape="\\")
             for keyword in preference.keywords
         ]
     )
@@ -103,7 +98,7 @@ def _region_expression(preference: MatchPreference) -> ColumnElement[bool]:
         return false()
     return or_(
         *[
-            Opportunity.region.ilike(_like_contains(region), escape="\\")
+            Opportunity.region.ilike(like_contains(region), escape="\\")
             for region in preference.regions
         ]
     )
